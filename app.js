@@ -4,7 +4,7 @@
 
     var margin = {t:100,r:150,b:250,l:150},
         margin2 = {t:30,b:100};
-    width = $('.canvas').width() - margin.l - margin.r,
+        width = $('.canvas').width() - margin.l - margin.r,
         height = $('.canvas').height() - margin.t - margin.b,
         height2 = margin.b - margin2.t - margin2.b;
 
@@ -15,49 +15,44 @@
         .append('g')
         .attr('transform',"translate("+margin.l+","+margin.t+")");
 
-
-    var projection = d3.geo.mercator()
-        .translate([width+900, height*4.5])
-        .scale(700);
-
-
-    var path = d3.geo.path()
-        .projection(projection);
+//    var projection = d3.geo.mercator()
+//        .translate([width+900, height*4.5])
+//        .scale(700);
+//
+//    var path = d3.geo.path()
+//        .projection(projection);
 
     var usTopoJson;
     var eventData;
-//----------------------------------------------------------------------above is the global variable so that you can use it in multiple functions
-    var y0 = 1979, y1=2012;
 
+    var parseDate = d3.time.format("%m/%d/%Y").parse;
+//----------------------------------------------------------------------above is the global variable so that you can use it in multiple functions
     var scales= {};
     scales.r = d3.scale.sqrt().domain([0, 70]).range([0,17]);
     scales.x = d3.time.scale().range([0, width]);
     scales.y = d3.scale.linear().domain([0, 100]).range([height, 0]);
-
-
 
 //----------------------------------------------------------------------
 
     var xAxis = d3.svg.axis()
         .scale(scales.x)
         .orient('bottom')
-        .tickSize(0)
-        .tickFormat(0);
+        .tickSize(10, -80)
+        .orient("bottom")
+        .ticks(d3.time.months, 1);
+
 
     var yAxis = d3.svg.axis()
         .scale(scales.y)
         .tickSize(6, 0)
         .orient("left");
 
+    var line = d3.svg.line()
+        .x(function(d){ return scales.x(d.date); })
+        .y(function(d){ return scales.y(d.totalVictims); })
 
 //----------------------------------------------------------------------
-//Create Buttons
-    $('.control #multiSeries').on('click', onClickMultiSeries);
-    $('.control #map').on('click', onClickMap);
-    $('.control #totalVictims').on('click', onClickTotalVictims);
-    $('.control #killed').on('click', onClickKill);
-    $('.control #wounded').on('click', onClickWound);
-//----------------------------------------------------------------------
+
     queue()
 
         .defer(d3.json, "data/us-10m.json")
@@ -95,149 +90,145 @@
         eventData.forEach(function(d){
             d.date = parseDate(d.date);
         });
-console.log(eventData);
-        draw(eventData);
-
-
-
-        var timeSeries = [];
-
-        for (var i=y0; i<=y1; i++){
-            var yVariable = d3.sum(eventData, function(d){
-                return d.data.get(i);
-            });
-            timeSeries.push({
-                date:i,
-                sum:yVariable
-            });
-        }
-
-
-        drawTimeSeries(timeSeries)
-
-
-
-
-    }
-
-    var parseDate = d3.time.format("%m/%d/%Y").parse;
-
-//----------------------------------------------------------------------
-    function onClickMultiSeries(e) {
-        e.preventDefault();
-
-        var circleNodes = svg.selectAll('circle')
-            .transition()
-            .attr('cx', function (d) {
-                return scales.x(d.date) })
-            .attr('cy', function(d){
-                return scales.y(d.shooterAge)})
-        drawMultiSeries();
-    }
-
-    function onClickMap(e){
-        e.preventDefault();
-        var circleNodes = svg.selectAll('circle')
-            .transition()
-            .attr('transform', function(d){
-                var xy = projection(d.lngLat);
-                return 'translate(' + xy[0] + ',' + xy[1] + ')'; })
-        drawMap(usTopoJson);
-    }
-
-    function onClickKill(e){
-        e.preventDefault();
-        var circleNodes = svg.selectAll('circle')
-            .transition()
-            .attr('r', function(d){return scales.r(d.kill)})
-            .attr('opacity',.3)
-            .style('fill', 'red')
-
-    }
-
-    function onClickWound(e) {
-        e.preventDefault();
-        var circleNodes = svg.selectAll('circle')
-            .transition()
-            .attr('r', function (d) {
-                return scales.r(d.wound)})
-            .attr('opacity',.3)
-            .style('fill', 'yellow')
-
-    }
-    function onClickTotalVictims(e){
-        e.preventDefault();
-
-        var circleNodes = svg.selectAll('circle')
-            .transition()
-            .attr('r', function(d){
-                return scales.r(d.totalVictims)})
-            .attr('opacity',.3)
-            .style('fill', 'white')
-    }
-
-
-//--------------------------draw function--------------------------------------------this is my circles without any size or position so when ever i say "select all circles" it selects these and transforms them
-    function draw(eventData) {
         console.log(eventData);
 
-        var circleNodes = svg.selectAll('.node')
-            .data(eventData, function (d) {
-                return d.id;
-            });
+        scales.x.domain(d3.extent(eventData, function(d){return d.date; }));
 
-        var circleNodesEnter = circleNodes.enter()
-            .append('g')
-            .attr('class', 'node')
-
-        circleNodesEnter
-            .append('circle')
-            .attr('r', 0)
-            .attr('stroke-width',.5)
-            .attr('stroke', 'black')
-
-        circleNodes
-            .exit()
-            .remove();
-
+        drawTimeSeries(eventData);
 
     }
+
+
+
+
 //--------------------------line graph function--------------------------------------------
+    function drawTimeSeries(eventData) {
 
+       svg.append("g")
+            .attr("class", "x axis")
+            .attr("transform", "translate(0, " + height + ")")
+            .call(xAxis)
+           .selectAll("text")
+           .attr("y", 9)
+           .attr("x", 9)
+           .attr("dy", ".35em")
+           .attr("transform", "rotate(45)")
+           .style("text-anchor", "start");
 
-
-    function drawTimeSeries(t) {
-
-        scales.x.domain(d3.extent(t, function(d) { return d.date; }));
-        scales.y.domain(d3.extent(t,function(d){return d.totalVictims}));
-
-
-
-    }
-
-
-
-//----------------------------------MAP------------------------------------
-    function drawMap(usTopoJson){
-        console.log(usTopoJson);
-
-        svg.append('path')
-            .datum(topojson.mesh(usTopoJson, usTopoJson.objects.states))
-            .attr('d', path)
-            .attr('class', 'states')
-
-    }
-    function drawMultiSeries(){
-        svg.select('path').remove();
-        svg.append('g')
-            .attr('class', 'axis')
-            .attr('transform', "translate(0, " + height + ")")
-            .call(xAxis);
-        svg.append('g')
-            .attr('class', 'axis')
+        svg.append("g")
+            .attr("class", "y axis")
             .call(yAxis);
+
+
+        svg.append("path")
+            .attr("d", line(eventData))
+            .attr('fill', 'none')
+            .attr('stroke', 'steelblue')
+            .attr('stroke-width', '2')
+
+   var dataPoints = svg.selectAll(".circles")
+            .data(eventData)
+            .enter()
+            .append("circle")
+            .filter(function(d){
+           return d.date && d.totalVictims;
+       })
+            .attr('class', 'circle')
+            .attr('cx', function(d) { return scales.x(d.date); })
+            .attr('cy', function(d) { return scales.y(d.totalVictims); })
+            .attr('r',.5)
+            .attr('fill', 'white')
+            .attr('stroke', 'steelblue')
+            .attr('stroke-width', '3')
+
     }
 
+
+//----------------------------------------------------------------------
+//Create Buttons
+//    $('.control #map').on('click', onClickMap);
+//    $('.control #totalVictims').on('click', onClickTotalVictims);
+//    $('.control #killed').on('click', onClickKill);
+//    $('.control #wounded').on('click', onClickWound);
+//----------------------------------------------------------------------
+//----------------------------------MAP------------------------------------
+//    function drawMap(usTopoJson){
+//        console.log(usTopoJson);
+//
+//        svg.append('path')
+//            .datum(topojson.mesh(usTopoJson, usTopoJson.objects.states))
+//            .attr('d', path)
+//            .attr('class', 'states')
+//
+//    }
+    //----------------------------------------------------------------------
+
+//    function onClickMap(e){
+//        e.preventDefault();
+//        var circleNodes = svg.selectAll('circle')
+//            .transition()
+//            .attr('transform', function(d){
+//                var xy = projection(d.lngLat);
+//                return 'translate(' + xy[0] + ',' + xy[1] + ')'; })
+//        drawMap(usTopoJson);
+//    }
+//
+//    function onClickKill(e){
+//        e.preventDefault();
+//        var circleNodes = svg.selectAll('circle')
+//            .transition()
+//            .attr('r', function(d){return scales.r(d.kill)})
+//            .attr('opacity',.3)
+//            .style('fill', 'red')
+//
+//    }
+//
+//    function onClickWound(e) {
+//        e.preventDefault();
+//        var circleNodes = svg.selectAll('circle')
+//            .transition()
+//            .attr('r', function (d) {
+//                return scales.r(d.wound)})
+//            .attr('opacity',.3)
+//            .style('fill', 'yellow')
+//
+//    }
+//    function onClickTotalVictims(e){
+//        e.preventDefault();
+//
+//        var circleNodes = svg.selectAll('circle')
+//            .transition()
+//            .attr('r', function(d){
+//                return scales.r(d.totalVictims)})
+//            .attr('opacity',.3)
+//            .style('fill', 'white')
+//    }
+//
+//
+////--------------------------draw function--------------------------------------------this is my circles without any size or position so when ever i say "select all circles" it selects these and transforms them
+//    function draw(eventData) {
+//        console.log(eventData);
+//
+//        var circleNodes = svg.selectAll('.node')
+//            .data(eventData, function (d) {
+//                return d.date;
+//            });
+//
+//        var circleNodesEnter = circleNodes.enter()
+//            .append('g')
+//            .attr('class', 'node')
+//
+//        circleNodesEnter
+//            .append('circle')
+//            .attr('r', 0)
+//            .attr('stroke-width',.5)
+//            .attr('stroke', 'black')
+//
+//        circleNodes
+//            .exit()
+//            .remove();
+//
+//    }
 
 
 }).call(this);

@@ -146,20 +146,7 @@ h3{
 }
 
 /*------------svg-----------------*/
-.axis path,
-.axis line,
-.axis1 path,
-.axis1 line {
-    fill:none;
-    stroke: #E6E7E8;
-    shape-rendering: crispEdges;
-    height:100%;
-    width:100%;
-}
 
-.x.axis path, .x.axis1 path{
-    display:none;
-}
 
 .line {
     fill: none;
@@ -172,6 +159,27 @@ h3{
     stroke:#000;
     stroke-width:.5px;
     opacity:.5;
+}
+
+
+.datapoint:hover{
+    fill: steelblue;
+}
+/*---------------------AXES-----------------------*/
+
+.axis {shape-rendering: crispEdges;
+}
+
+.x.axis line, .x.axis path {
+    stroke: #bdbfbd;
+
+}
+
+
+.y.axis line, .y.axis path {
+    fill: none;
+    stroke: #bdbfbd;
+
 }
 
 a:link {color: rgb(90,90,90);; text-decoration:none;}
