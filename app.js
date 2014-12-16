@@ -26,18 +26,15 @@
 
     var usTopoJson;
     var eventData;
-
-    var timeFormat = d3.time.format("%Y-%m-%d").parse;
-
-
-
 //----------------------------------------------------------------------above is the global variable so that you can use it in multiple functions
     var y0 = 1979, y1=2012;
 
     var scales= {};
     scales.r = d3.scale.sqrt().domain([0, 70]).range([0,17]);
-    scales.x = d3.scale.linear().domain([y0,y1]).range([0, width]);
+    scales.x = d3.time.scale().range([0, width]);
     scales.y = d3.scale.linear().domain([0, 100]).range([height, 0]);
+
+
 
 //----------------------------------------------------------------------
 
@@ -82,9 +79,10 @@
                 description: (d["Description"] == " " ? undefined: d["Description"]),
                 lat: (+d["lat"] == " " ? undefined: +d["lat"]),
                 lng: (+d["lng"] == " " ? undefined: +d["lng"]),
-                lngLat: [+d["lng"], +d["lat"]]
+                lngLat: [+d["lng"], +d["lat"]],
+                date: (d["Date"])
             }
-        }, parseTime)
+        })
         .await(dataLoaded);
 
 //----------------------------------------------------------------------below is when i say the global = the parses data
@@ -93,21 +91,36 @@
 
         usTopoJson = us;
         eventData = data;
+
+        eventData.forEach(function(d){
+            d.date = parseDate(d.date);
+        });
+console.log(eventData);
         draw(eventData);
 
-    }
-
-    function parseTime(){
-
-        timeFormat = {
-            date: +d["Date"]
 
 
+        var timeSeries = [];
+
+        for (var i=y0; i<=y1; i++){
+            var yVariable = d3.sum(eventData, function(d){
+                return d.data.get(i);
+            });
+            timeSeries.push({
+                date:i,
+                sum:yVariable
+            });
         }
 
 
+        drawTimeSeries(timeSeries)
+
+
+
 
     }
+
+    var parseDate = d3.time.format("%m/%d/%Y").parse;
 
 //----------------------------------------------------------------------
     function onClickMultiSeries(e) {
@@ -187,7 +200,23 @@
             .exit()
             .remove();
 
+
     }
+//--------------------------line graph function--------------------------------------------
+
+
+
+    function drawTimeSeries(t) {
+
+        scales.x.domain(d3.extent(t, function(d) { return d.date; }));
+        scales.y.domain(d3.extent(t,function(d){return d.totalVictims}));
+
+
+
+    }
+
+
+
 //----------------------------------MAP------------------------------------
     function drawMap(usTopoJson){
         console.log(usTopoJson);
