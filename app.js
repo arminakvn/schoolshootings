@@ -8,4 +8,213 @@
 
   map = L.mapbox.map("map", "arminavn.ib1f592g").setView([40, -74.50], 9);
 
+    var margin = {t:100,r:150,b:250,l:150},
+        margin2 = {t:30,b:100};
+    width = $('.canvas').width() - margin.l - margin.r,
+        height = $('.canvas').height() - margin.t - margin.b,
+        height2 = margin.b - margin2.t - margin2.b;
+
+    var svg = d3.select('.canvas')
+        .append('svg')
+        .attr('width', width + margin.l + margin.r)
+        .attr('height', height + margin.t + margin.b)
+        .append('g')
+        .attr('transform',"translate("+margin.l+","+margin.t+")");
+
+
+    var projection = d3.geo.mercator()
+        .translate([width+900, height*4.5])
+        .scale(700);
+
+
+    var path = d3.geo.path()
+        .projection(projection);
+
+    var usTopoJson;
+    var eventData;
+
+    var timeFormat = d3.time.format("%Y-%m-%d").parse;
+
+
+
+//----------------------------------------------------------------------above is the global variable so that you can use it in multiple functions
+    var y0 = 1979, y1=2012;
+
+    var scales= {};
+    scales.r = d3.scale.sqrt().domain([0, 70]).range([0,17]);
+    scales.x = d3.scale.linear().domain([y0,y1]).range([0, width]);
+    scales.y = d3.scale.linear().domain([0, 100]).range([height, 0]);
+
+//----------------------------------------------------------------------
+
+    var xAxis = d3.svg.axis()
+        .scale(scales.x)
+        .orient('bottom')
+        .tickSize(0)
+        .tickFormat(0);
+
+    var yAxis = d3.svg.axis()
+        .scale(scales.y)
+        .tickSize(6, 0)
+        .orient("left");
+
+
+//----------------------------------------------------------------------
+//Create Buttons
+    $('.control #multiSeries').on('click', onClickMultiSeries);
+    $('.control #map').on('click', onClickMap);
+    $('.control #totalVictims').on('click', onClickTotalVictims);
+    $('.control #killed').on('click', onClickKill);
+    $('.control #wounded').on('click', onClickWound);
+//----------------------------------------------------------------------
+    queue()
+
+        .defer(d3.json, "data/us-10m.json")
+        .defer(d3.csv, "data/MSA_Stanford_Complete_Database.csv", function(d){
+            return {
+                totalVictims: (+d["Total Number of Victims"] == " " ? undefined: +d["Total Number of Victims"]),
+                kill: (+d["Number of Victim Fatalities"] == " " ? undefined: +d["Number of Victim Fatalities"]),
+                wound: (+d["Number of Victims Injured"] == " " ? undefined: +d["Number of Victims Injured"]),
+                id: +d["CaseID"],
+                shooterAge: (+d["Average Shooter Age"] == " " ? undefined: +d["Average Shooter Age"]),
+                shooterSex: (d["Shooter Sex"] == " " ? undefined: d["Shooter Sex"]),
+                shooterRace: (d["Shooter Race"] == " " ? undefined: d["Shooter Race"]),
+                typeOfGun: (d["Type of Gun – General"] == " " ? undefined: d["Type of Gun – General"]),
+                numberOfGuns: (+d["Total Number of Guns"] == " " ? undefined: +d["Total Number of Guns"]),
+                fateOfShooter: (d["Fate of Shooter"] == " " ? undefined: d["Fate of Shooter"]),
+                mentalIllness: (d["History of Mental Illness - General"] == " " ? undefined: d["History of Mental Illness - General"]),
+                schoolRelated: (d["School Related"] == " " ? undefined: d["School Related"]),
+                placeType: (d["Place Type"] == " " ? undefined: d["Place Type"]),
+                description: (d["Description"] == " " ? undefined: d["Description"]),
+                lat: (+d["lat"] == " " ? undefined: +d["lat"]),
+                lng: (+d["lng"] == " " ? undefined: +d["lng"]),
+                lngLat: [+d["lng"], +d["lat"]]
+            }
+        }, parseTime)
+        .await(dataLoaded);
+
+//----------------------------------------------------------------------below is when i say the global = the parses data
+    function dataLoaded(err, us, data) {
+        if (err) console.error(err);
+
+        usTopoJson = us;
+        eventData = data;
+        draw(eventData);
+
+    }
+
+    function parseTime(){
+
+        timeFormat = {
+            date: +d["Date"]
+
+
+        }
+
+
+
+    }
+
+//----------------------------------------------------------------------
+    function onClickMultiSeries(e) {
+        e.preventDefault();
+
+        var circleNodes = svg.selectAll('circle')
+            .transition()
+            .attr('cx', function (d) {
+                return scales.x(d.date) })
+            .attr('cy', function(d){
+                return scales.y(d.shooterAge)})
+        drawMultiSeries();
+    }
+
+    function onClickMap(e){
+        e.preventDefault();
+        var circleNodes = svg.selectAll('circle')
+            .transition()
+            .attr('transform', function(d){
+                var xy = projection(d.lngLat);
+                return 'translate(' + xy[0] + ',' + xy[1] + ')'; })
+        drawMap(usTopoJson);
+    }
+
+    function onClickKill(e){
+        e.preventDefault();
+        var circleNodes = svg.selectAll('circle')
+            .transition()
+            .attr('r', function(d){return scales.r(d.kill)})
+            .attr('opacity',.3)
+            .style('fill', 'red')
+
+    }
+
+    function onClickWound(e) {
+        e.preventDefault();
+        var circleNodes = svg.selectAll('circle')
+            .transition()
+            .attr('r', function (d) {
+                return scales.r(d.wound)})
+            .attr('opacity',.3)
+            .style('fill', 'yellow')
+
+    }
+    function onClickTotalVictims(e){
+        e.preventDefault();
+
+        var circleNodes = svg.selectAll('circle')
+            .transition()
+            .attr('r', function(d){
+                return scales.r(d.totalVictims)})
+            .attr('opacity',.3)
+            .style('fill', 'white')
+    }
+
+
+//--------------------------draw function--------------------------------------------this is my circles without any size or position so when ever i say "select all circles" it selects these and transforms them
+    function draw(eventData) {
+        console.log(eventData);
+
+        var circleNodes = svg.selectAll('.node')
+            .data(eventData, function (d) {
+                return d.id;
+            });
+
+        var circleNodesEnter = circleNodes.enter()
+            .append('g')
+            .attr('class', 'node')
+
+        circleNodesEnter
+            .append('circle')
+            .attr('r', 0)
+            .attr('stroke-width',.5)
+            .attr('stroke', 'black')
+
+        circleNodes
+            .exit()
+            .remove();
+
+    }
+//----------------------------------MAP------------------------------------
+    function drawMap(usTopoJson){
+        console.log(usTopoJson);
+
+        svg.append('path')
+            .datum(topojson.mesh(usTopoJson, usTopoJson.objects.states))
+            .attr('d', path)
+            .attr('class', 'states')
+
+    }
+    function drawMultiSeries(){
+        svg.select('path').remove();
+        svg.append('g')
+            .attr('class', 'axis')
+            .attr('transform', "translate(0, " + height + ")")
+            .call(xAxis);
+        svg.append('g')
+            .attr('class', 'axis')
+            .call(yAxis);
+    }
+
+
+
 }).call(this);
