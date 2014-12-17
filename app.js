@@ -39,7 +39,8 @@
         .orient('bottom')
         .tickSize(10, -5)
         .orient("bottom")
-        .ticks(d3.time.years,1);
+        .ticks(d3.time.years,1)
+    .tickSubdivide(true);
 
 
     var yAxis = d3.svg.axis()
@@ -115,13 +116,18 @@
 //--------------------------line graph function--------------------------------------------
     function drawTimeSeries(eventData) {
 
+        // Add the clip path.
+        svg.append("clipPath")
+            .attr("id", "clip")
+            .append("rect")
+            .attr("width", width)
+            .attr("height", height);
+
        svg.append("g")
             .attr("class", "x axis")
             .attr("transform", "translate(0, " + height + ")")
             .call(xAxis)
            .selectAll("text")
-//           .attr("y", 9)
-//           .attr("x", 9)
            .attr("dy", ".35em")
            .attr("transform", "rotate(45)")
            .style("text-anchor", "start");
@@ -130,12 +136,19 @@
             .attr("class", "y axis")
             .call(yAxis);
 
-
+   var dataPath = svg.selectAll(".path")
         svg.append("path")
             .attr("d", line(eventData))
             .attr('fill', 'none')
             .attr('stroke', 'steelblue')
             .attr('stroke-width', '2')
+            .attr("transform", null)
+            .transition()
+            .attr("transform", "translate(" + -15*scales.x(+1) + ")")
+            .delay(50)
+            .duration(8000)
+
+
 
    var dataPoints = svg.selectAll(".circles")
             .data(eventData)
@@ -148,6 +161,57 @@
             .attr('fill', 'white')
             .attr('stroke', 'steelblue')
             .attr('stroke-width', '3')
+       .attr("transform", null)
+       .transition()
+       .attr("transform", "translate(" + -15*scales.x(+1) + ")")
+       .delay(50)
+       .duration(8000);
+
+        var clip
+
+
+//        var curtain = svg.append('rect')
+//            .attr('x', -1 * width)
+//            .attr('y', -1 * height)
+//            .attr('height', height)
+//            .attr('width', width)
+//            .attr('class', 'curtain')
+//            .attr('transform', 'rotate(180)')
+//            .style('fill', '#ffffff')
+//
+//        /* Optionally add a guideline */
+//        var guideline = svg.append('line')
+//            .attr('stroke', '#333')
+//            .attr('stroke-width', 0)
+//            .attr('class', 'guide')
+//            .attr('x1', 1)
+//            .attr('y1', 1)
+//            .attr('x2', 1)
+//            .attr('y2', height)
+//
+//        /* Create a shared transition for anything we're animating */
+//        var t = svg.transition()
+//            .delay(750)
+//            .duration(60000)
+//            .ease('linear')
+//            .each('end', function() {
+//                d3.select('line.guide')
+//                    .transition()
+//                    .style('opacity', 0)
+//                    .remove()
+//            });
+//
+//        t.select('rect.curtain')
+//            .attr('width', 0);
+//        t.select('line.guide')
+//            .attr('transform', 'translate(' + width + ', 0)')
+//
+//        d3.select("#show_guideline").on("change", function(e) {
+//            guideline.attr('stroke-width', this.checked ? 1 : 0);
+//            curtain.attr("opacity", this.checked ? 0.75 : 1);
+//        })
+
+
 
     }
 
