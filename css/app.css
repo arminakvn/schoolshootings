@@ -61,8 +61,8 @@ body{
 
 /*----------------------canvas-----------------------------------------*/
 .container .canvas {
-    width:60%;
-    height:500px;
+    width:400px;
+    height:300px;
     margin-right: 20px;
     left:350px;
     top: 50px;
@@ -171,14 +171,14 @@ h3{
 }
 
 .x.axis line, .x.axis path {
-    stroke: #bdbfbd;
+    stroke: none;
 
 }
 
 
 .y.axis line, .y.axis path {
     fill: none;
-    stroke: #bdbfbd;
+    stroke: none;
 
 }
 

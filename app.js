@@ -29,18 +29,18 @@
 //----------------------------------------------------------------------above is the global variable so that you can use it in multiple functions
     var scales= {};
     scales.r = d3.scale.sqrt().domain([0, 70]).range([0,17]);
-    scales.x = d3.time.scale().range([0, width]);
-    scales.y = d3.scale.linear().domain([0, 100]).range([height, 0]);
+    scales.x = d3.time.scale().range([0, width*10]);
+    scales.y = d3.scale.linear().domain([0, 75]).range([height, 0]);
 
 //----------------------------------------------------------------------
 
     var xAxis = d3.svg.axis()
         .scale(scales.x)
         .orient('bottom')
-        .tickSize(10, -5)
+        .tickSize(10, 0)
         .orient("bottom")
         .ticks(d3.time.years,1)
-    .tickSubdivide(true);
+        .tickSubdivide(true);
 
 
     var yAxis = d3.svg.axis()
@@ -142,11 +142,11 @@
             .attr('fill', 'none')
             .attr('stroke', 'steelblue')
             .attr('stroke-width', '2')
-            .attr("transform", null)
+            .attr("transform", "translate(" + scales.x(+1) + ")")
             .transition()
-            .attr("transform", "translate(" + -15*scales.x(+1) + ")")
-            .delay(50)
-            .duration(8000)
+            .attr("transform", "translate(" + -20*scales.x(+1) + ")")
+            .delay(0)
+            .duration(30000)
 
 
 
@@ -161,55 +161,15 @@
             .attr('fill', 'white')
             .attr('stroke', 'steelblue')
             .attr('stroke-width', '3')
-       .attr("transform", null)
-       .transition()
-       .attr("transform", "translate(" + -15*scales.x(+1) + ")")
-       .delay(50)
-       .duration(8000);
-
-        var clip
+       .attr("transform", "translate(" + scales.x(+1) + ")")
+            .transition()
+            .attr("transform", "translate(" + -20*scales.x(+1) + ")")
+            .delay(0)
+            .duration(30000);
 
 
-//        var curtain = svg.append('rect')
-//            .attr('x', -1 * width)
-//            .attr('y', -1 * height)
-//            .attr('height', height)
-//            .attr('width', width)
-//            .attr('class', 'curtain')
-//            .attr('transform', 'rotate(180)')
-//            .style('fill', '#ffffff')
-//
-//        /* Optionally add a guideline */
-//        var guideline = svg.append('line')
-//            .attr('stroke', '#333')
-//            .attr('stroke-width', 0)
-//            .attr('class', 'guide')
-//            .attr('x1', 1)
-//            .attr('y1', 1)
-//            .attr('x2', 1)
-//            .attr('y2', height)
-//
-//        /* Create a shared transition for anything we're animating */
-//        var t = svg.transition()
-//            .delay(750)
-//            .duration(60000)
-//            .ease('linear')
-//            .each('end', function() {
-//                d3.select('line.guide')
-//                    .transition()
-//                    .style('opacity', 0)
-//                    .remove()
-//            });
-//
-//        t.select('rect.curtain')
-//            .attr('width', 0);
-//        t.select('line.guide')
-//            .attr('transform', 'translate(' + width + ', 0)')
-//
-//        d3.select("#show_guideline").on("change", function(e) {
-//            guideline.attr('stroke-width', this.checked ? 1 : 0);
-//            curtain.attr("opacity", this.checked ? 0.75 : 1);
-//        })
+
+
 
 
 
