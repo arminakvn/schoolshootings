@@ -2,7 +2,7 @@
 (function() {
 
 
-    var margin = {t:100,r:150,b:250,l:150},
+    var margin = {t:50,r:50,b:50,l:50},
         margin2 = {t:30,b:100};
         width = $('.canvas').width() - margin.l - margin.r,
         height = $('.canvas').height() - margin.t - margin.b,
@@ -25,7 +25,7 @@
     var usTopoJson;
     var eventData;
 
-    var parseDate = d3.time.format("%m/%d/%Y").parse;
+    var parseDate = d3.time.format("%m/%d/%y").parse;
 //----------------------------------------------------------------------above is the global variable so that you can use it in multiple functions
     var scales= {};
     scales.r = d3.scale.sqrt().domain([0, 70]).range([0,17]);
@@ -37,9 +37,9 @@
     var xAxis = d3.svg.axis()
         .scale(scales.x)
         .orient('bottom')
-        .tickSize(10, -80)
+        .tickSize(10, -5)
         .orient("bottom")
-        .ticks(d3.time.months, 1);
+        .ticks(d3.time.years,1);
 
 
     var yAxis = d3.svg.axis()
@@ -87,12 +87,23 @@
         usTopoJson = us;
         eventData = data;
 
-        eventData.forEach(function(d){
-            d.date = parseDate(d.date);
+        eventData.forEach(function(d) {
+            var date = new Date(d.date);
+            d.date = date;
         });
-        console.log(eventData);
+
+
+        console.log("right after event data",eventData);
+        console.log(d3.time.format("%m/%d/%Y"));
 
         scales.x.domain(d3.extent(eventData, function(d){return d.date; }));
+
+
+        var minDate = eventData[0].date;
+        var maxDate = eventData[eventData.length - 1].date;
+        console.log(minDate, maxDate);
+
+
 
         drawTimeSeries(eventData);
 
@@ -109,8 +120,8 @@
             .attr("transform", "translate(0, " + height + ")")
             .call(xAxis)
            .selectAll("text")
-           .attr("y", 9)
-           .attr("x", 9)
+//           .attr("y", 9)
+//           .attr("x", 9)
            .attr("dy", ".35em")
            .attr("transform", "rotate(45)")
            .style("text-anchor", "start");
@@ -130,9 +141,6 @@
             .data(eventData)
             .enter()
             .append("circle")
-            .filter(function(d){
-           return d.date && d.totalVictims;
-       })
             .attr('class', 'circle')
             .attr('cx', function(d) { return scales.x(d.date); })
             .attr('cy', function(d) { return scales.y(d.totalVictims); })
