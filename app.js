@@ -15,21 +15,13 @@
         .append('g')
         .attr('transform',"translate("+margin.l+","+margin.t+")");
 
-//    var projection = d3.geo.mercator()
-//        .translate([width+900, height*4.5])
-//        .scale(700);
-//
-//    var path = d3.geo.path()
-//        .projection(projection);
-
-    var usTopoJson;
     var eventData;
 
     var parseDate = d3.time.format("%m/%d/%y").parse;
 //----------------------------------------------------------------------above is the global variable so that you can use it in multiple functions
     var scales= {};
     scales.r = d3.scale.sqrt().domain([0, 70]).range([0,17]);
-    scales.x = d3.time.scale().range([0, width*10]);
+    scales.x = d3.time.scale().range([0, width]);
     scales.y = d3.scale.linear().domain([0, 75]).range([height, 0]);
 
 //----------------------------------------------------------------------
@@ -40,7 +32,7 @@
         .tickSize(10, 0)
         .orient("bottom")
         .ticks(d3.time.years,1)
-        .tickSubdivide(true);
+        .tickSubdivide(true)
 
 
     var yAxis = d3.svg.axis()
@@ -116,12 +108,12 @@
 //--------------------------line graph function--------------------------------------------
     function drawTimeSeries(eventData) {
 
-        // Add the clip path.
-        svg.append("clipPath")
-            .attr("id", "clip")
-            .append("rect")
-            .attr("width", width)
-            .attr("height", height);
+//        // Add the clip path.
+//        svg.append("clipPath")
+//            .attr("id", "clip")
+//            .append("rect")
+//            .attr("width", width)
+//            .attr("height", height);
 
        svg.append("g")
             .attr("class", "x axis")
@@ -132,135 +124,90 @@
            .attr("transform", "rotate(45)")
            .style("text-anchor", "start");
 
-        svg.append("g")
+       svg.append("g")
             .attr("class", "y axis")
             .call(yAxis);
 
-   var dataPath = svg.selectAll(".path")
-        svg.append("path")
+   var dataPath = svg.append("path")
             .attr("d", line(eventData))
             .attr('fill', 'none')
             .attr('stroke', 'steelblue')
             .attr('stroke-width', '2')
-            .attr("transform", "translate(" + scales.x(+1) + ")")
+
+        var totalLength = dataPath.node().getTotalLength();
+
+        dataPath
+            .attr("stroke-dasharray", totalLength + " " + totalLength)
+            .attr("stroke-dashoffset", totalLength)
             .transition()
-            .attr("transform", "translate(" + -20*scales.x(+1) + ")")
-            .delay(0)
-            .duration(30000)
-
-
-
-   var dataPoints = svg.selectAll(".circles")
-            .data(eventData)
-            .enter()
-            .append("circle")
-            .attr('class', 'circle')
-            .attr('cx', function(d) { return scales.x(d.date); })
-            .attr('cy', function(d) { return scales.y(d.totalVictims); })
-            .attr('r',.5)
-            .attr('fill', 'white')
-            .attr('stroke', 'steelblue')
-            .attr('stroke-width', '3')
-       .attr("transform", "translate(" + scales.x(+1) + ")")
-            .transition()
-            .attr("transform", "translate(" + -20*scales.x(+1) + ")")
-            .delay(0)
-            .duration(30000);
+            .duration(20000)
+            .ease("linear")
+            .attr("stroke-dashoffset", 0);
 
 
 
 
+//            .attr("transform", "translate(" + scales.x(+1) + ")")
+//            .transition()
+//            .attr("transform", "translate(" + -20*scales.x(+1) + ")")
+//            .delay(0)
+//            .ease("linear")
+//            .duration(32000)
+
+
+
+//   var dataPoints = svg.selectAll(".circles")
+//            .data(eventData)
+//            .enter()
+//            .append("circle")
+//            .attr('class', 'circle')
+//            .attr('cx', function(d) { return scales.x(d.date); })
+//            .attr('cy', function(d) { return scales.y(d.totalVictims); })
+//            .attr('r',.5)
+//            .attr('fill', 'white')
+//            .attr('stroke', 'steelblue')
+//            .attr('stroke-width', '3')
+//            .attr("transform", "translate(" + scales.x(+1) + ")")
+//            .transition()
+//            .attr("transform", "translate(" + -20*scales.x(+1) + ")")
+//            .delay(0)
+//            .ease("linear")
+//            .duration(32000);
+
+
+
+        function onMouseEnter(d) {
+
+            var container = d3.select('.canvas').node();
+            var mouse = d3.mouse(container);
+
+            var tooltip = d3.select('.tooltip')
+                .style('visibility', 'visible');
+
+            tooltip
+
+                .select('h2').html(d.name + "<br/>" + "killed: "+d.kill +"<br/>" + "wounded: "+ d.wound + "<br/>" + "year: "+ d.yr)
+
+
+            var tooltipWidth = $('.tooltip').width();
+
+            tooltip
+                .style('left', mouse[0] - tooltipWidth / 2 + 'px')
+                .style('top', mouse[1] - 80 + 'px');
+
+        }
+
+        function onMouseLeave(d) {
+            d3.select('.tooltip')
+                .style('visibility', 'hidden');
+
+        }
 
 
 
     }
 
 
-//----------------------------------------------------------------------
-//Create Buttons
-//    $('.control #map').on('click', onClickMap);
-//    $('.control #totalVictims').on('click', onClickTotalVictims);
-//    $('.control #killed').on('click', onClickKill);
-//    $('.control #wounded').on('click', onClickWound);
-//----------------------------------------------------------------------
-//----------------------------------MAP------------------------------------
-//    function drawMap(usTopoJson){
-//        console.log(usTopoJson);
-//
-//        svg.append('path')
-//            .datum(topojson.mesh(usTopoJson, usTopoJson.objects.states))
-//            .attr('d', path)
-//            .attr('class', 'states')
-//
-//    }
-    //----------------------------------------------------------------------
-
-//    function onClickMap(e){
-//        e.preventDefault();
-//        var circleNodes = svg.selectAll('circle')
-//            .transition()
-//            .attr('transform', function(d){
-//                var xy = projection(d.lngLat);
-//                return 'translate(' + xy[0] + ',' + xy[1] + ')'; })
-//        drawMap(usTopoJson);
-//    }
-//
-//    function onClickKill(e){
-//        e.preventDefault();
-//        var circleNodes = svg.selectAll('circle')
-//            .transition()
-//            .attr('r', function(d){return scales.r(d.kill)})
-//            .attr('opacity',.3)
-//            .style('fill', 'red')
-//
-//    }
-//
-//    function onClickWound(e) {
-//        e.preventDefault();
-//        var circleNodes = svg.selectAll('circle')
-//            .transition()
-//            .attr('r', function (d) {
-//                return scales.r(d.wound)})
-//            .attr('opacity',.3)
-//            .style('fill', 'yellow')
-//
-//    }
-//    function onClickTotalVictims(e){
-//        e.preventDefault();
-//
-//        var circleNodes = svg.selectAll('circle')
-//            .transition()
-//            .attr('r', function(d){
-//                return scales.r(d.totalVictims)})
-//            .attr('opacity',.3)
-//            .style('fill', 'white')
-//    }
-//
-//
-////--------------------------draw function--------------------------------------------this is my circles without any size or position so when ever i say "select all circles" it selects these and transforms them
-//    function draw(eventData) {
-//        console.log(eventData);
-//
-//        var circleNodes = svg.selectAll('.node')
-//            .data(eventData, function (d) {
-//                return d.date;
-//            });
-//
-//        var circleNodesEnter = circleNodes.enter()
-//            .append('g')
-//            .attr('class', 'node')
-//
-//        circleNodesEnter
-//            .append('circle')
-//            .attr('r', 0)
-//            .attr('stroke-width',.5)
-//            .attr('stroke', 'black')
-//
-//        circleNodes
-//            .exit()
-//            .remove();
-//
-//    }
 
 
 }).call(this);
