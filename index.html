@@ -5,11 +5,12 @@
 <script src="js/leaflet.js"></script>
 <!-- <script src='https://api.tiles.mapbox.com/mapbox.js/v2.1.2/mapbox.js'></script> -->
 <script src="js/queue.min.js"></script>
+<script src="d3.slider-master/d3.slider.js"></script>
 <script src="js/d3.js"></script>
 <script src="js/d3.layout.cloud.js"></script>
 <link href='css/leaflet.css' rel='stylesheet' />
-<script src="js/topojson.v0.js"></script>
 
+<link href='d3.slider-master/d3.slider.css' rel='stylesheet' />
 <link href='css/app.css' rel='stylesheet' />
 
 </body>
@@ -19,7 +20,7 @@
 
    <div class="canvas">
         <div class="timeBar">
-            <h2></h2>
+
             <span></span>
         </div>
 
@@ -28,10 +29,21 @@
 
 
         </div>
+
+       <div id="date">
+           <p>date</p>
+           <p id="month"></p>
+       </div>
+       <div id="play"></div>
+       <div id="slider-container">
+           <div id="slider-div"></div>
+           <div id="slider-probe">
+               <p></p>
+               <div></div>
+           </div>
+       </div>
     </div>
 </div><!--.container-->
-
-
 
 
 <body>

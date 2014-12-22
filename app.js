@@ -14,7 +14,14 @@
         .append('g')
         .attr('transform',"translate("+margin.l+","+margin.t+")");
 
-    var eventData;
+    var months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+
+    var eventData, dateScale, sliderScale, slider;
+    var currentFrame = 0,
+        interval, frameLength = 500,
+        isPlaying = false;
+
+    var sliderMargin = 65;
 
 
     var parseDate = d3.time.format("%m/%d/%y").parse;
@@ -77,7 +84,6 @@
     function dataLoaded(err, us, data) {
         if (err) console.error(err);
 
-        usTopoJson = us;
         eventData = data;
 
         eventData.forEach(function(d) {
@@ -102,29 +108,14 @@
 
     }
 
+createLegend();
+createSlider();
 
 
 
 //--------------------------line graph function--------------------------------------------
     function drawTimeSeries(eventData) {
             console.log(eventData);
-
-      var dataEl = d3.selectAll(".timeBar");
-            console.log(dataEl)
-            dataEl.selectAll("text")
-                .data(eventData);
-
-        dataEl.attr("class", "update");
-
-
-
-        dataEl
-                .data(eventData)
-                .text( function(d){
-                    return d.date
-                });
-
-        console.log(dataEl)
 
             svg.append("g")
                 .attr("class", "x axis")
@@ -146,44 +137,94 @@
                 .attr('stroke-width', '2')
                 .attr("stroke-dashoffset", 0);
 
-
-            var dataPath = svg.append("path")
-                .attr("d", line(eventData))
-                .attr('fill', 'none')
-                .attr('stroke', 'rgb(170, 270, 170')
-                .attr('stroke-width', '2')
-
-
-            var totalLength = dataPath.node().getTotalLength();
-
-            dataPath
-                .attr("stroke-dasharray", totalLength + " " + totalLength)
-                .attr("stroke-dashoffset", totalLength)
-                .transition()
-                .duration(30000)
-                .ease("linear")
-                .attr("stroke-dashoffset", 0);
-
-            var dataPath2 = svg.append("path")
-                .attr("d", line(eventData))
-                .attr('fill', 'none')
-                .attr('stroke', 'rgb(14, 80, 14')
-                .attr('stroke-width', '2')
-
-            var totalLength = dataPath2.node().getTotalLength();
-
-            dataPath2
-                .attr("stroke-dasharray", totalLength + " " + totalLength)
-                .attr("stroke-dashoffset", totalLength)
-                .transition()
-                .delay(30)
-                .duration(30000)
-                .ease("linear")
-                .attr("stroke-dashoffset", 0);
-
-
-
         }
+//--------------------------
+    function animate(){
+        interval = setInterval( function(){
+            currentFrame++;
+
+            if ( currentFrame == eventData.length ) currentFrame = 0;
+
+            d3.select("#slider-div .d3-slider-handle")
+                .style("left", 100*currentFrame/eventData.length + "%" );
+            slider.value(currentFrame)
+
+            drawTimeSeries( eventData[ currentFrame ], true );
+
+            if ( currentFrame == eventData.length - 1 ){
+                isPlaying = false;
+                d3.select("#play").classed("pause",false).attr("title","Play animation");
+                clearInterval( interval );
+                return;
+            }
+
+        },frameLength);
+    }
+//--------------------------
+    function createSlider() {
+        sliderScale = d3.scale.linear().domain([0, eventData.length - 1]);
+        var val = slider ? slider.value() : 0;
+        slider = d3.slider()
+            .scale(scales.x)
+            .on("slide", function (event, value) {
+                if (isPlaying) {
+                    clearInterval(interval);
+                }
+                currentFrame = value;
+                drawTimeSeries(eventData[values], d3.event.type != "drag");
+            })
+            .on("slideend", function () {
+                if (isPlaying) animate();
+                d3.select("#slider-div").on("mousemove", sliderProbe)
+            })
+            .on("slidestart", function () {
+                d3.select("#slider-div").on("mousemove", null)
+            })
+            .value(val);
+
+        d3.select("#slider-div").remove();
+
+        d3.select("#slider-container")
+            .append("div")
+            .attr("id", "slider-div")
+            .style("width", scales.x.range()[1] + "px")
+            .on("mousemove", sliderProbe)
+            .on("mouseout", function () {
+                d3.select("#slider-probe").style("display", "none");
+            })
+            .call(slider);
+
+        d3.select("#slider-div a").on("mousemove", function () {
+            d3.event.stopPropagation();
+        })
+        var sliderAxis = d3.svg.axis()
+            .scale( dateScale )
+            .tickValues( dateScale.ticks(orderedColumns.length).filter(function(d,i){
+                // ticks only for beginning of each year, plus first and last
+                return d.getMonth() == 0 || i == 0 || i == orderedColumns.length-1;
+            }))
+            .tickFormat(function(d){
+                // abbreviated year for most, full month/year for the ends
+                if ( d.getMonth() == 0 ) return "'" + d.getFullYear().toString().substr(2);
+                return months[d.getMonth()] + " " + d.getFullYear();
+            })
+            .tickSize(10)
+
+        d3.select("#axis").remove();
+
+        d3.select("#slider-container")
+            .append("svg")
+            .attr("id","axis")
+            .attr("width",dateScale.range()[1] + sliderMargin*2 )
+            .attr("height",25)
+            .append("g")
+            .attr("transform","translate(" + (sliderMargin+1) + ",0)")
+            .call(sliderAxis);
+
+        d3.select("#axis > g g:first-child text").attr("text-anchor","end").style("text-anchor","end");
+        d3.select("#axis > g g:last-of-type text").attr("text-anchor","start").style("text-anchor","start");
+
+    }
 
 
 
