@@ -15,8 +15,7 @@
         .attr('transform',"translate("+margin.l+","+margin.t+")");
 
     var eventData;
-    var graph;
-    var legendFontSize = 12;
+
 
     var parseDate = d3.time.format("%m/%d/%y").parse;
 //----------------------------------------------------------------------above is the global variable so that you can use it in multiple functions
@@ -109,19 +108,22 @@
 //--------------------------line graph function--------------------------------------------
     function drawTimeSeries(eventData) {
             console.log(eventData);
-            dataEl = d3.selectAll(".timeBar");
+
+      var dataEl = d3.selectAll(".timeBar");
             console.log(dataEl)
-            dataEl.selectAll("g").append("span").text("2999292929");
+            dataEl.selectAll("text")
+                .data(eventData);
+
+        dataEl.attr("class", "update");
+
+
 
         dataEl
                 .data(eventData)
-                .enter()
-
-                .transition()
-                .duration(30000)
                 .text( function(d){
                     return d.date
                 });
+
         console.log(dataEl)
 
             svg.append("g")
@@ -180,25 +182,7 @@
                 .attr("stroke-dashoffset", 0);
 
 
-            var createLegend = function () {
 
-
-                var legendLabelGroup = dataPath.append("g")
-                    .attr("class", "legend")
-                    .data(eventData.date)
-                    .enter().append("g")
-                    .attr("class", "legend");
-
-                legendLabelGroup.append("svg:text")
-                    .attr("class", "legend name")
-                    .text(function (d) {
-                        return d.date;
-                    })
-                    .attr("font-size", "12px")
-                    .attr("fill", "white")
-
-
-            }
         }
 
 
