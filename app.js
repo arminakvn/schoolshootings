@@ -14,14 +14,8 @@
         .append('g')
         .attr('transform',"translate("+margin.l+","+margin.t+")");
 
-    var months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+    var eventData;
 
-    var eventData, dateScale, sliderScale, slider;
-    var currentFrame = 0,
-        interval, frameLength = 500,
-        isPlaying = false;
-
-    var sliderMargin = 65;
 
 
     var parseDate = d3.time.format("%m/%d/%y").parse;
@@ -32,6 +26,24 @@
     scales.y = d3.scale.linear().domain([0, 75]).range([height, 0]);
 
 //----------------------------------------------------------------------
+    var brush = d3.svg.brush()
+        .x(scales.x)
+        .extent([0,0])
+        .on("brush", brushed)
+
+    var slider = svg.append("g")
+        .attr("class", "slider")
+        .call(brush);
+    slider.selectAll(".extent,.resize")
+        .remove();
+
+    var handle = slider.append("circle")
+        .attr("class", "handle")
+        .attr("transform", "translate(0, " + height / 2 + ")")
+        .attr("r", 9);
+
+
+
 
     var xAxis = d3.svg.axis()
         .scale(scales.x)
@@ -39,8 +51,6 @@
         .tickSize(-height, 0)
         .orient("bottom")
         .tickSubdivide(true)
-
-
 
     var yAxis = d3.svg.axis()
         .scale(scales.y)
@@ -97,21 +107,14 @@
 
         scales.x.domain(d3.extent(eventData, function(d){return d.date; }));
 
-
         var minDate = eventData[0].date;
         var maxDate = eventData[eventData.length - 1].date;
         console.log(minDate, maxDate);
 
-
-
         drawTimeSeries(eventData);
+        createSlider();
 
     }
-
-createLegend();
-createSlider();
-
-
 
 //--------------------------line graph function--------------------------------------------
     function drawTimeSeries(eventData) {
@@ -138,91 +141,11 @@ createSlider();
                 .attr("stroke-dashoffset", 0);
 
         }
-//--------------------------
-    function animate(){
-        interval = setInterval( function(){
-            currentFrame++;
 
-            if ( currentFrame == eventData.length ) currentFrame = 0;
 
-            d3.select("#slider-div .d3-slider-handle")
-                .style("left", 100*currentFrame/eventData.length + "%" );
-            slider.value(currentFrame)
-
-            drawTimeSeries( eventData[ currentFrame ], true );
-
-            if ( currentFrame == eventData.length - 1 ){
-                isPlaying = false;
-                d3.select("#play").classed("pause",false).attr("title","Play animation");
-                clearInterval( interval );
-                return;
-            }
-
-        },frameLength);
-    }
 //--------------------------
     function createSlider() {
-        sliderScale = d3.scale.linear().domain([0, eventData.length - 1]);
-        var val = slider ? slider.value() : 0;
-        slider = d3.slider()
-            .scale(scales.x)
-            .on("slide", function (event, value) {
-                if (isPlaying) {
-                    clearInterval(interval);
-                }
-                currentFrame = value;
-                drawTimeSeries(eventData[values], d3.event.type != "drag");
-            })
-            .on("slideend", function () {
-                if (isPlaying) animate();
-                d3.select("#slider-div").on("mousemove", sliderProbe)
-            })
-            .on("slidestart", function () {
-                d3.select("#slider-div").on("mousemove", null)
-            })
-            .value(val);
 
-        d3.select("#slider-div").remove();
-
-        d3.select("#slider-container")
-            .append("div")
-            .attr("id", "slider-div")
-            .style("width", scales.x.range()[1] + "px")
-            .on("mousemove", sliderProbe)
-            .on("mouseout", function () {
-                d3.select("#slider-probe").style("display", "none");
-            })
-            .call(slider);
-
-        d3.select("#slider-div a").on("mousemove", function () {
-            d3.event.stopPropagation();
-        })
-        var sliderAxis = d3.svg.axis()
-            .scale( dateScale )
-            .tickValues( dateScale.ticks(orderedColumns.length).filter(function(d,i){
-                // ticks only for beginning of each year, plus first and last
-                return d.getMonth() == 0 || i == 0 || i == orderedColumns.length-1;
-            }))
-            .tickFormat(function(d){
-                // abbreviated year for most, full month/year for the ends
-                if ( d.getMonth() == 0 ) return "'" + d.getFullYear().toString().substr(2);
-                return months[d.getMonth()] + " " + d.getFullYear();
-            })
-            .tickSize(10)
-
-        d3.select("#axis").remove();
-
-        d3.select("#slider-container")
-            .append("svg")
-            .attr("id","axis")
-            .attr("width",dateScale.range()[1] + sliderMargin*2 )
-            .attr("height",25)
-            .append("g")
-            .attr("transform","translate(" + (sliderMargin+1) + ",0)")
-            .call(sliderAxis);
-
-        d3.select("#axis > g g:first-child text").attr("text-anchor","end").style("text-anchor","end");
-        d3.select("#axis > g g:last-of-type text").attr("text-anchor","start").style("text-anchor","start");
 
     }
 
