@@ -35,9 +35,10 @@
         .tickSubdivide(true)
 
 
+
     var yAxis = d3.svg.axis()
         .scale(scales.y)
-        .tickSize(6, 0)
+        .tickSize(-width, 0)
         .orient("left");
 
     var line = d3.svg.line()
@@ -108,13 +109,6 @@
 //--------------------------line graph function--------------------------------------------
     function drawTimeSeries(eventData) {
 
-//        // Add the clip path.
-//        svg.append("clipPath")
-//            .attr("id", "clip")
-//            .append("rect")
-//            .attr("width", width)
-//            .attr("height", height);
-
        svg.append("g")
             .attr("class", "x axis")
             .attr("transform", "translate(0, " + height + ")")
@@ -128,11 +122,19 @@
             .attr("class", "y axis")
             .call(yAxis);
 
+        var stillPath = svg.append("path")
+            .attr("d", line(eventData))
+            .attr('fill', 'none')
+            .attr('stroke', 'rgb(14, 80, 14')
+            .attr('stroke-width', '2')
+            .attr('opacity', '.4')
+
    var dataPath = svg.append("path")
             .attr("d", line(eventData))
             .attr('fill', 'none')
-            .attr('stroke', 'steelblue')
+            .attr('stroke', 'rgb(170, 270, 170')
             .attr('stroke-width', '2')
+
 
         var totalLength = dataPath.node().getTotalLength();
 
@@ -144,35 +146,26 @@
             .ease("linear")
             .attr("stroke-dashoffset", 0);
 
+        var dataPath2 = svg.append("path")
+            .attr("d", line(eventData))
+            .attr('fill', 'none')
+            .attr('stroke', 'rgb(14, 80, 14')
+            .attr('stroke-width', '2')
+
+        var totalLength = dataPath2.node().getTotalLength();
+
+        dataPath2
+            .attr("stroke-dasharray", totalLength + " " + totalLength)
+            .attr("stroke-dashoffset", totalLength)
+            .transition()
+            .delay(30)
+            .duration(20000)
+            .ease("linear")
+            .attr("stroke-dashoffset", 0);
 
 
 
-//            .attr("transform", "translate(" + scales.x(+1) + ")")
-//            .transition()
-//            .attr("transform", "translate(" + -20*scales.x(+1) + ")")
-//            .delay(0)
-//            .ease("linear")
-//            .duration(32000)
 
-
-
-//   var dataPoints = svg.selectAll(".circles")
-//            .data(eventData)
-//            .enter()
-//            .append("circle")
-//            .attr('class', 'circle')
-//            .attr('cx', function(d) { return scales.x(d.date); })
-//            .attr('cy', function(d) { return scales.y(d.totalVictims); })
-//            .attr('r',.5)
-//            .attr('fill', 'white')
-//            .attr('stroke', 'steelblue')
-//            .attr('stroke-width', '3')
-//            .attr("transform", "translate(" + scales.x(+1) + ")")
-//            .transition()
-//            .attr("transform", "translate(" + -20*scales.x(+1) + ")")
-//            .delay(0)
-//            .ease("linear")
-//            .duration(32000);
 
 
 

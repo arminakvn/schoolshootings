@@ -9,10 +9,10 @@
 div {
       background: #333;
       margin-bottom: 10px;
-      padding: 7px;
+      /*padding: 7px;*/
       color: #fff;
       font-family: Arial;
-      font-size: 12px; 
+      font-size: 12px;
     }
 .paratext-info {
     padding: 6px 8px;
@@ -27,12 +27,6 @@ div {
     color: #777;
 }
 
-body
-{
-    background-color:#000000;
-}
-
-
 
 body{
     font-family: 'Open Sans Condensed', sans-serif;
@@ -43,7 +37,7 @@ body{
 }
 .header{
     width:100%;
-    height:10%;
+    height:4%;
     padding-bottom:20px;
 }
 .container{
@@ -54,23 +48,14 @@ body{
 /*----------------------canvas-----------------------------------------*/
 .container .canvas {
     width:60%;
-    height:300px;
-    margin-right: 20px;
-    left:350px;
-    top: 50px;
+    height:200px;
+    margin-left:35%;
+    top:400px;
     border-radius:7px;
     position:relative;
-    background: rgb(50,50,50);
+    background: rgb(20,20,20);
 }
-.container .control{
-    width:171px;
-    height:500px;
-    left:70px;
-    margin-top:20px;
-    position:absolute;
-    float:left;
-    /*background: rgb(255,255,255);*/
-}
+
 /*----------------------font-----------------------------------------*/
 h1{
     color: #00ff00;
@@ -93,14 +78,11 @@ h3{
     word-spacing:11px;
     letter-spacing:1.98px;
     display:block;
-    background-color:rgb(50,50,50);
     width:100%;
 }
 
 
 /*----------------------control-----------------------------------------*/
-/*map event by && multi-series line graph*/
-
 
 .control .button{
     color: rgb(70,70,70);
@@ -121,7 +103,6 @@ h3{
 }
 .control .buttonMain{
     color: #00ff00;
-    background-color:rgb(30,30,30);
     font-size: .6em;
     height:35px;
     width:100%;
@@ -142,17 +123,9 @@ h3{
 
 .line {
     fill: none;
-    stroke-width: 1.5px;
+    stroke-width: .3px;
+    stroke: "white";
 }
-
-
-.canvas .states{
-    fill:none;
-    stroke:#000;
-    stroke-width:.5px;
-    opacity:.5;
-}
-
 
 .datapoint:hover{
     fill: steelblue;
@@ -163,14 +136,17 @@ h3{
 }
 
 .x.axis line, .x.axis path {
-    stroke: none;
+    stroke: rgb(170,170,170);
+    opacity:.2;
+
 
 }
 
 
 .y.axis line, .y.axis path {
     fill: none;
-    stroke: none;
+    stroke: rgb(70,70,70);
+    stroke-width:1px;
 
 }
 
