@@ -55,6 +55,18 @@ body{
     position:relative;
     background: rgb(20,20,20);
 }
+.canvas .timeBar{
+    width:15%;
+    height:40px;
+    float:right;
+    margin-right:50px;
+    background: rgb(120,120,120);
+}
+.timeLegend{
+
+    font-family: Arial;
+    font-size: 12px;
+}
 
 /*----------------------font-----------------------------------------*/
 h1{
@@ -122,9 +134,7 @@ h3{
 
 
 .line {
-    fill: none;
-    stroke-width: .3px;
-    stroke: "white";
+
 }
 
 .datapoint:hover{

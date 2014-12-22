@@ -2,11 +2,10 @@
 (function() {
 
 
-    var margin = {t:50,r:50,b:50,l:50},
-        margin2 = {t:30,b:100};
+    var margin = {t:20,r:50,b:80,l:50},
         width = $('.canvas').width() - margin.l - margin.r,
-        height = $('.canvas').height() - margin.t - margin.b,
-        height2 = margin.b - margin2.t - margin2.b;
+        height = $('.canvas').height() - margin.t - margin.b;
+
 
     var svg = d3.select('.canvas')
         .append('svg')
@@ -16,6 +15,8 @@
         .attr('transform',"translate("+margin.l+","+margin.t+")");
 
     var eventData;
+    var graph;
+    var legendFontSize = 12;
 
     var parseDate = d3.time.format("%m/%d/%y").parse;
 //----------------------------------------------------------------------above is the global variable so that you can use it in multiple functions
@@ -29,9 +30,8 @@
     var xAxis = d3.svg.axis()
         .scale(scales.x)
         .orient('bottom')
-        .tickSize(10, 0)
+        .tickSize(-height, 0)
         .orient("bottom")
-        .ticks(d3.time.years,1)
         .tickSubdivide(true)
 
 
@@ -108,97 +108,99 @@
 
 //--------------------------line graph function--------------------------------------------
     function drawTimeSeries(eventData) {
+            console.log(eventData);
+            dataEl = d3.selectAll(".timeBar");
+            console.log(dataEl)
+            dataEl.selectAll("g").append("span").text("2999292929");
 
-       svg.append("g")
-            .attr("class", "x axis")
-            .attr("transform", "translate(0, " + height + ")")
-            .call(xAxis)
-           .selectAll("text")
-           .attr("dy", ".35em")
-           .attr("transform", "rotate(45)")
-           .style("text-anchor", "start");
+        dataEl
+                .data(eventData)
+                .enter()
 
-       svg.append("g")
-            .attr("class", "y axis")
-            .call(yAxis);
+                .transition()
+                .duration(30000)
+                .text( function(d){
+                    return d.date
+                });
+        console.log(dataEl)
 
-        var stillPath = svg.append("path")
-            .attr("d", line(eventData))
-            .attr('fill', 'none')
-            .attr('stroke', 'rgb(14, 80, 14')
-            .attr('stroke-width', '2')
-            .attr('opacity', '.4')
+            svg.append("g")
+                .attr("class", "x axis")
+                .attr("transform", "translate(0, " + height + ")")
+                .call(xAxis)
+                .selectAll("text")
+                .attr("dy", ".35em")
+                .attr("transform", "rotate(45)")
+                .style("text-anchor", "start");
 
-   var dataPath = svg.append("path")
-            .attr("d", line(eventData))
-            .attr('fill', 'none')
-            .attr('stroke', 'rgb(170, 270, 170')
-            .attr('stroke-width', '2')
+            svg.append("g")
+                .attr("class", "y axis")
+                .call(yAxis);
 
-
-        var totalLength = dataPath.node().getTotalLength();
-
-        dataPath
-            .attr("stroke-dasharray", totalLength + " " + totalLength)
-            .attr("stroke-dashoffset", totalLength)
-            .transition()
-            .duration(20000)
-            .ease("linear")
-            .attr("stroke-dashoffset", 0);
-
-        var dataPath2 = svg.append("path")
-            .attr("d", line(eventData))
-            .attr('fill', 'none')
-            .attr('stroke', 'rgb(14, 80, 14')
-            .attr('stroke-width', '2')
-
-        var totalLength = dataPath2.node().getTotalLength();
-
-        dataPath2
-            .attr("stroke-dasharray", totalLength + " " + totalLength)
-            .attr("stroke-dashoffset", totalLength)
-            .transition()
-            .delay(30)
-            .duration(20000)
-            .ease("linear")
-            .attr("stroke-dashoffset", 0);
+            var stillPath = svg.append("path")
+                .attr("d", line(eventData))
+                .attr('fill', 'none')
+                .attr('stroke', 'rgb(14, 80, 14')
+                .attr('stroke-width', '2')
+                .attr("stroke-dashoffset", 0);
 
 
+            var dataPath = svg.append("path")
+                .attr("d", line(eventData))
+                .attr('fill', 'none')
+                .attr('stroke', 'rgb(170, 270, 170')
+                .attr('stroke-width', '2')
 
 
+            var totalLength = dataPath.node().getTotalLength();
+
+            dataPath
+                .attr("stroke-dasharray", totalLength + " " + totalLength)
+                .attr("stroke-dashoffset", totalLength)
+                .transition()
+                .duration(30000)
+                .ease("linear")
+                .attr("stroke-dashoffset", 0);
+
+            var dataPath2 = svg.append("path")
+                .attr("d", line(eventData))
+                .attr('fill', 'none')
+                .attr('stroke', 'rgb(14, 80, 14')
+                .attr('stroke-width', '2')
+
+            var totalLength = dataPath2.node().getTotalLength();
+
+            dataPath2
+                .attr("stroke-dasharray", totalLength + " " + totalLength)
+                .attr("stroke-dashoffset", totalLength)
+                .transition()
+                .delay(30)
+                .duration(30000)
+                .ease("linear")
+                .attr("stroke-dashoffset", 0);
 
 
-
-        function onMouseEnter(d) {
-
-            var container = d3.select('.canvas').node();
-            var mouse = d3.mouse(container);
-
-            var tooltip = d3.select('.tooltip')
-                .style('visibility', 'visible');
-
-            tooltip
-
-                .select('h2').html(d.name + "<br/>" + "killed: "+d.kill +"<br/>" + "wounded: "+ d.wound + "<br/>" + "year: "+ d.yr)
+            var createLegend = function () {
 
 
-            var tooltipWidth = $('.tooltip').width();
+                var legendLabelGroup = dataPath.append("g")
+                    .attr("class", "legend")
+                    .data(eventData.date)
+                    .enter().append("g")
+                    .attr("class", "legend");
 
-            tooltip
-                .style('left', mouse[0] - tooltipWidth / 2 + 'px')
-                .style('top', mouse[1] - 80 + 'px');
+                legendLabelGroup.append("svg:text")
+                    .attr("class", "legend name")
+                    .text(function (d) {
+                        return d.date;
+                    })
+                    .attr("font-size", "12px")
+                    .attr("fill", "white")
 
+
+            }
         }
 
-        function onMouseLeave(d) {
-            d3.select('.tooltip')
-                .style('visibility', 'hidden');
-
-        }
-
-
-
-    }
 
 
 
