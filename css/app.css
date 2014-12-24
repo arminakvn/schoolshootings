@@ -57,9 +57,9 @@ body{
 }
 .lineGraph {
     width:60%;
-    height:200px;
+    height:300px;
     margin-left:35%;
-    top:20%;
+    top:10%;
     border-radius:7px;
     position:relative;
     border-style: solid;
@@ -134,10 +134,10 @@ h3{
 }
 
 /*------------svg-----------------*/
-
-
-.line {
-
+.states{
+    fill:none;
+    stroke:#000;
+    stroke-width:.5px;
 }
 
 .datapoint:hover{

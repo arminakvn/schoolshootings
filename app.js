@@ -2,11 +2,10 @@
 (function() {
 
 
-    var margin = {t:20,r:50,b:80,l:50},
+    var margin = {t:20,r:20,b:60,l:20},
         margin2 = {t:30,r:100, b:100, l:100};
-
         width = $('.canvas').width() - margin.l - margin.r,
-        height = $('.canvas').height() - margin.t - margin.b,
+        height = $('.canvas').height() - margin.b - margin.t,
         height2 = margin.b - margin2.t - margin2.b;
 
 
@@ -24,15 +23,26 @@
         .append('g')
         .attr('transform',"translate("+margin.l+","+margin.t+")");
 
-    var eventData;
 
+    var projection = d3.geo.mercator()
+        .translate([width/2, height/1.5])
+        .scale(200);
+
+
+    var path = d3.geo.path()
+        .projection(projection);
+
+    var eventData;
+    var usTopoJson;
 
 
     var parseDate = d3.time.format("%m/%d/%y").parse;
 //----------------------------------------------------------------------above is the global variable so that you can use it in multiple functions
     var scales= {};
+    scales.cSize = d3.scale.sqrt().domain([0, 100]).range([0,20]);
     scales.r = d3.scale.sqrt().domain([0, 70]).range([0,17]);
     scales.x = d3.time.scale().range([0, width/1.1]).clamp(true);
+    scales.x2 = d3.time.scale().range([ 0, width/1.7]).clamp(true);
     scales.y = d3.scale.linear().domain([0, 75]).range([height, 0]);
 
 //----------------------------------------------------------------------
@@ -41,6 +51,7 @@
         .append('g')
         .attr('class','time-series')
         .attr('transform', 'translate('+margin.l + ',' + (margin.t+height+margin2.t) + ')');
+
     var xAxis = d3.svg.axis()
         .scale(scales.x)
         .orient('bottom')
@@ -53,10 +64,22 @@
         .tickSize(-width/1.7, 0)
         .orient("left");
 
+    var xAxis2 = d3.svg.axis()
+        .scale(scales.x2)
+        .orient('bottom')
+        .tickSize(-height, 0)
+        .orient("bottom")
+        .tickSubdivide(true)
+
+//    var yAxis2 = d3.svg.axis()
+//        .scale(scales.y)
+//        .tickSize(-width/1.7, 0)
+//        .orient("left");
+
     //GENERATORS
 
     var line = d3.svg.line()
-        .x(function(d){ return scales.x(d.date); })
+        .x(function(d){ return scales.x2(d.date); })
         .y(function(d){ return scales.y(d.totalVictims); });
 
 //----------------------------------------------------------------------
@@ -92,6 +115,7 @@
     function dataLoaded(err, us, data) {
         if (err) console.error(err);
 
+        usTopoJson = us;
         eventData = data;
 
         eventData.forEach(function(d) {
@@ -103,6 +127,7 @@
         console.log("right after event data",eventData);
         console.log(d3.time.format("%m/%d/%Y"));
 
+        scales.x2.domain(d3.extent(eventData, function(d){return d.date; }));
         scales.x.domain(d3.extent(eventData, function(d){return d.date; }));
 
         var minDate = eventData[0].date;
@@ -111,6 +136,8 @@
 
         drawTimeSeries(eventData);
         createSlider();
+        drawMap(usTopoJson);
+        console.log(usTopoJson);
 
     }
 
@@ -121,7 +148,7 @@
             graph.append("g")
                 .attr("class", "x axis")
                 .attr("transform", "translate(0, " + height + ")")
-                .call(xAxis)
+                .call(xAxis2)
                 .selectAll("text")
                 .attr("dy", ".35em")
                 .attr("transform", "rotate(45)")
@@ -225,6 +252,14 @@ slider.call(brush.event);
 
 
     }
+
+ function drawMap(usTopoJson) {
+
+     svg.append('path')
+         .datum(topojson.mesh(usTopoJson, usTopoJson.objects.states))
+         .attr('d', path)
+         .attr('class', 'states')
+ }
 
 
 }).call(this);
