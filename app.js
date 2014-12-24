@@ -8,11 +8,12 @@
 
   map = L.mapbox.map("map", "arminavn.ib1f592g").setView([40, -74.50], 9);
 
-    var margin = {t:100,r:150,b:250,l:150},
-        margin2 = {t:30,b:100};
-    width = $('.canvas').width() - margin.l - margin.r,
-        height = $('.canvas').height() - margin.t - margin.b,
+    var margin = {t:20,r:20,b:60,l:20},
+        margin2 = {t:30,r:100, b:100, l:100};
+        width = $('.canvas').width() - margin.l - margin.r,
+        height = $('.canvas').height() - margin.b - margin.t,
         height2 = margin.b - margin2.t - margin2.b;
+
 
     var svg = d3.select('.canvas')
         .append('svg')
@@ -21,52 +22,74 @@
         .append('g')
         .attr('transform',"translate("+margin.l+","+margin.t+")");
 
+    var graph = d3.select('.lineGraph')
+        .append('svg')
+        .attr('width', width + margin.l + margin.r)
+        .attr('height', height + margin.t + margin.b)
+        .append('g')
+        .attr('transform',"translate("+margin.l+","+margin.t+")");
+
 
     var projection = d3.geo.mercator()
-        .translate([width+900, height*4.5])
-        .scale(700);
+        .translate([width/2, height/1.5])
+        .scale(200);
 
 
     var path = d3.geo.path()
         .projection(projection);
 
-    var usTopoJson;
     var eventData;
-
-    var timeFormat = d3.time.format("%Y-%m-%d").parse;
-
+    var usTopoJson;
 
 
+    var parseDate = d3.time.format("%m/%d/%y").parse;
 //----------------------------------------------------------------------above is the global variable so that you can use it in multiple functions
-    var y0 = 1979, y1=2012;
-
     var scales= {};
+    scales.cSize = d3.scale.sqrt().domain([0, 100]).range([0,20]);
     scales.r = d3.scale.sqrt().domain([0, 70]).range([0,17]);
-    scales.x = d3.scale.linear().domain([y0,y1]).range([0, width]);
-    scales.y = d3.scale.linear().domain([0, 100]).range([height, 0]);
+    scales.x = d3.time.scale().range([0, width/1.1]).clamp(true);
+    scales.x2 = d3.time.scale().range([ 0, width/1.7]).clamp(true);
+    scales.y = d3.scale.linear().domain([0, 75]).range([height, 0]);
 
 //----------------------------------------------------------------------
+//Set up another <g> element to draw the timeline with
+    var svgLine = svg
+        .append('g')
+        .attr('class','time-series')
+        .attr('transform', 'translate('+margin.l + ',' + (margin.t+height+margin2.t) + ')');
 
     var xAxis = d3.svg.axis()
         .scale(scales.x)
         .orient('bottom')
-        .tickSize(0)
-        .tickFormat(0);
+        .tickSize(-height, 0)
+        .orient("bottom")
+        .tickSubdivide(true)
 
     var yAxis = d3.svg.axis()
         .scale(scales.y)
-        .tickSize(6, 0)
+        .tickSize(-width/1.7, 0)
         .orient("left");
 
+    var xAxis2 = d3.svg.axis()
+        .scale(scales.x2)
+        .orient('bottom')
+        .tickSize(-height, 0)
+        .orient("bottom")
+        .tickSubdivide(true)
+
+//    var yAxis2 = d3.svg.axis()
+//        .scale(scales.y)
+//        .tickSize(-width/1.7, 0)
+//        .orient("left");
+
+    //GENERATORS
+
+    var line = d3.svg.line()
+        .x(function(d){ return scales.x2(d.date); })
+        .y(function(d){ return scales.y(d.totalVictims); });
 
 //----------------------------------------------------------------------
-//Create Buttons
-    $('.control #multiSeries').on('click', onClickMultiSeries);
-    $('.control #map').on('click', onClickMap);
-    $('.control #totalVictims').on('click', onClickTotalVictims);
-    $('.control #killed').on('click', onClickKill);
-    $('.control #wounded').on('click', onClickWound);
-//----------------------------------------------------------------------
+
     queue()
 
         .defer(d3.json, "data/us-10m.json")
@@ -88,9 +111,10 @@
                 description: (d["Description"] == " " ? undefined: d["Description"]),
                 lat: (+d["lat"] == " " ? undefined: +d["lat"]),
                 lng: (+d["lng"] == " " ? undefined: +d["lng"]),
-                lngLat: [+d["lng"], +d["lat"]]
+                lngLat: [+d["lng"], +d["lat"]],
+                date: (d["Date"])
             }
-        }, parseTime)
+        })
         .await(dataLoaded);
 
 //----------------------------------------------------------------------below is when i say the global = the parses data
@@ -99,122 +123,149 @@
 
         usTopoJson = us;
         eventData = data;
-        draw(eventData);
+
+        eventData.forEach(function(d) {
+            var date = new Date(d.date);
+            d.date = date;
+        });
+
+
+        console.log("right after event data",eventData);
+        console.log(d3.time.format("%m/%d/%Y"));
+
+        scales.x2.domain(d3.extent(eventData, function(d){return d.date; }));
+        scales.x.domain(d3.extent(eventData, function(d){return d.date; }));
+
+        var minDate = eventData[0].date;
+        var maxDate = eventData[eventData.length - 1].date;
+        console.log(minDate, maxDate);
+
+        drawTimeSeries(eventData);
+        createSlider();
+        drawMap(usTopoJson);
+        console.log(usTopoJson);
 
     }
 
-    function parseTime(){
+//--------------------------line graph function--------------------------------------------
+    function drawTimeSeries(eventData) {
+            console.log(eventData);
 
-        timeFormat = {
-            date: +d["Date"]
+            graph.append("g")
+                .attr("class", "x axis")
+                .attr("transform", "translate(0, " + height + ")")
+                .call(xAxis2)
+                .selectAll("text")
+                .attr("dy", ".35em")
+                .attr("transform", "rotate(45)")
+                .style("text-anchor", "start");
 
+            graph.append("g")
+                .attr("class", "y axis")
+                .call(yAxis);
 
+            stillPath = graph.append("path")
+                .attr("d", line(eventData))
+                .attr('fill', 'none')
+                .attr('stroke', 'rgb(14, 80, 14')
+                .attr('stroke-width', '2')
+                .attr("stroke-dashoffset", 0);
+
+        var dataPath = graph.append("path")
+            .attr("d", line(eventData))
+            .attr('fill', 'none')
+            .attr('stroke', 'rgb(170, 270, 170')
+            .attr('stroke-width', '2');
+
+        var totalLength = dataPath.node().getTotalLength();
+
+        dataPath
+            .attr("stroke-dasharray", totalLength + " " + totalLength)
+            .attr("stroke-dashoffset", totalLength)
+            .transition()
+            .delay(30)
+            .duration(20000)
+            .ease("linear")
+            .attr("stroke-dashoffset", 0);
+
+        var dataPath2 = graph.append("path")
+            .attr("d", line(eventData))
+            .attr('fill', 'none')
+            .attr('stroke', 'rgb(100, 150, 100')
+            .attr('stroke-width', '2');
+
+        var totalLength = dataPath2.node().getTotalLength();
+
+        dataPath2
+            .attr("stroke-dasharray", totalLength + " " + totalLength)
+            .attr("stroke-dashoffset", totalLength)
+            .transition()
+            .delay(70)
+            .duration(20000)
+            .ease("linear")
+            .attr("stroke-dashoffset", 0);
         }
 
 
 
+//--------------------------
+    function createSlider() {
+
+        var brush = d3.svg.brush()
+            .x(scales.x)
+            .extent([eventData.length, eventData.length])
+            .on('brush', brushed);
+
+        var slider = svgLine.append('g')
+            .attr('class', 'slider')
+            .call(brush);
+
+        slider.selectAll('.extent, .resize').remove();
+        slider.select('.canvas').attr('height', height2);
+
+        var handle = slider.append('g')
+            .attr('class', 'handle');
+        handle.append('path')
+            .attr('transform', 'translate(0,' + height2 + ')')
+            .datum([
+                [-35, 0],
+                [-35, 22],
+                [35, 22],
+                [35, 0]
+            ])
+            .attr('d', d3.svg.area());
+        handle.append('text')
+            .attr('text-anchor', 'middle')
+            .attr('y', height2)
+
+slider.call(brush.event);
+
+   function brushed(){
+       var year = brush.extent()[0];
+
+       if (d3.event.sourceEvent){
+           year = (scales.x.invert(d3.mouse(this)[0]));
+
+       }
+       brush.extent([year, year]);
+       var xPos = scales.x(year);
+       handle
+           .attr('transform', 'translate('+xPos+'0)')
+           .select('text')
+           .text(year);
+
+   }
+
+
     }
 
-//----------------------------------------------------------------------
-    function onClickMultiSeries(e) {
-        e.preventDefault();
+ function drawMap(usTopoJson) {
 
-        var circleNodes = svg.selectAll('circle')
-            .transition()
-            .attr('cx', function (d) {
-                return scales.x(d.date) })
-            .attr('cy', function(d){
-                return scales.y(d.shooterAge)})
-        drawMultiSeries();
-    }
-
-    function onClickMap(e){
-        e.preventDefault();
-        var circleNodes = svg.selectAll('circle')
-            .transition()
-            .attr('transform', function(d){
-                var xy = projection(d.lngLat);
-                return 'translate(' + xy[0] + ',' + xy[1] + ')'; })
-        drawMap(usTopoJson);
-    }
-
-    function onClickKill(e){
-        e.preventDefault();
-        var circleNodes = svg.selectAll('circle')
-            .transition()
-            .attr('r', function(d){return scales.r(d.kill)})
-            .attr('opacity',.3)
-            .style('fill', 'red')
-
-    }
-
-    function onClickWound(e) {
-        e.preventDefault();
-        var circleNodes = svg.selectAll('circle')
-            .transition()
-            .attr('r', function (d) {
-                return scales.r(d.wound)})
-            .attr('opacity',.3)
-            .style('fill', 'yellow')
-
-    }
-    function onClickTotalVictims(e){
-        e.preventDefault();
-
-        var circleNodes = svg.selectAll('circle')
-            .transition()
-            .attr('r', function(d){
-                return scales.r(d.totalVictims)})
-            .attr('opacity',.3)
-            .style('fill', 'white')
-    }
-
-
-//--------------------------draw function--------------------------------------------this is my circles without any size or position so when ever i say "select all circles" it selects these and transforms them
-    function draw(eventData) {
-        console.log(eventData);
-
-        var circleNodes = svg.selectAll('.node')
-            .data(eventData, function (d) {
-                return d.id;
-            });
-
-        var circleNodesEnter = circleNodes.enter()
-            .append('g')
-            .attr('class', 'node')
-
-        circleNodesEnter
-            .append('circle')
-            .attr('r', 0)
-            .attr('stroke-width',.5)
-            .attr('stroke', 'black')
-
-        circleNodes
-            .exit()
-            .remove();
-
-    }
-//----------------------------------MAP------------------------------------
-    function drawMap(usTopoJson){
-        console.log(usTopoJson);
-
-        svg.append('path')
-            .datum(topojson.mesh(usTopoJson, usTopoJson.objects.states))
-            .attr('d', path)
-            .attr('class', 'states')
-
-    }
-    function drawMultiSeries(){
-        svg.select('path').remove();
-        svg.append('g')
-            .attr('class', 'axis')
-            .attr('transform', "translate(0, " + height + ")")
-            .call(xAxis);
-        svg.append('g')
-            .attr('class', 'axis')
-            .call(yAxis);
-    }
-
+     svg.append('path')
+         .datum(topojson.mesh(usTopoJson, usTopoJson.objects.states))
+         .attr('d', path)
+         .attr('class', 'states')
+ }
 
 
 }).call(this);
