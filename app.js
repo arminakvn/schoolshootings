@@ -3,11 +3,20 @@
 
 
     var margin = {t:20,r:50,b:80,l:50},
+        margin2 = {t:30,b:100};
         width = $('.canvas').width() - margin.l - margin.r,
-        height = $('.canvas').height() - margin.t - margin.b;
+        height = $('.canvas').height() - margin.t - margin.b,
+        height2 = margin.b - margin2.t - margin2.b;
 
 
     var svg = d3.select('.canvas')
+        .append('svg')
+        .attr('width', width + margin.l + margin.r)
+        .attr('height', height + margin.t + margin.b)
+        .append('g')
+        .attr('transform',"translate("+margin.l+","+margin.t+")");
+
+    var graph = d3.select('.lineGraph')
         .append('svg')
         .attr('width', width + margin.l + margin.r)
         .attr('height', height + margin.t + margin.b)
@@ -22,15 +31,15 @@
 //----------------------------------------------------------------------above is the global variable so that you can use it in multiple functions
     var scales= {};
     scales.r = d3.scale.sqrt().domain([0, 70]).range([0,17]);
-    scales.x = d3.time.scale().range([0, width]);
+    scales.x = d3.time.scale().range([0, width/1.7]).clamp(true);
     scales.y = d3.scale.linear().domain([0, 75]).range([height, 0]);
 
 //----------------------------------------------------------------------
-
-
-
-
-
+//Set up another <g> element to draw the timeline with
+    var svgLine = svg
+        .append('g')
+        .attr('class','time-series')
+        .attr('transform', 'translate('+margin.l + ',' + (margin.t+height+margin2.t) + ')');
     var xAxis = d3.svg.axis()
         .scale(scales.x)
         .orient('bottom')
@@ -40,12 +49,14 @@
 
     var yAxis = d3.svg.axis()
         .scale(scales.y)
-        .tickSize(-width, 0)
+        .tickSize(-width/1.7, 0)
         .orient("left");
+
+    //GENERATORS
 
     var line = d3.svg.line()
         .x(function(d){ return scales.x(d.date); })
-        .y(function(d){ return scales.y(d.totalVictims); })
+        .y(function(d){ return scales.y(d.totalVictims); });
 
 //----------------------------------------------------------------------
 
@@ -97,8 +108,25 @@
         var maxDate = eventData[eventData.length - 1].date;
         console.log(minDate, maxDate);
 
+
+//        //construct an x-y series for line plot
+//        var timeSeries = [];
+//        for(var i=1967; i<=2014; i++){
+//
+//            timeSeries.push({
+//               date: i,
+//               amount:
+//            });
+//        }
+//        drawTimeSeries(timeSeries);
+
+
+
         drawTimeSeries(eventData);
         createSlider();
+
+
+
 
     }
 
@@ -106,7 +134,7 @@
     function drawTimeSeries(eventData) {
             console.log(eventData);
 
-            svg.append("g")
+            graph.append("g")
                 .attr("class", "x axis")
                 .attr("transform", "translate(0, " + height + ")")
                 .call(xAxis)
@@ -115,23 +143,24 @@
                 .attr("transform", "rotate(45)")
                 .style("text-anchor", "start");
 
-            svg.append("g")
+            graph.append("g")
                 .attr("class", "y axis")
                 .call(yAxis);
 
-            var stillPath = svg.append("path")
+            stillPath = graph.append("path")
                 .attr("d", line(eventData))
                 .attr('fill', 'none')
                 .attr('stroke', 'rgb(14, 80, 14')
                 .attr('stroke-width', '2')
                 .attr("stroke-dashoffset", 0);
 
-        var dataPath = svg.append("path")
+
+
+        var dataPath = graph.append("path")
             .attr("d", line(eventData))
             .attr('fill', 'none')
             .attr('stroke', 'rgb(170, 270, 170')
             .attr('stroke-width', '2');
-
 
         var totalLength = dataPath.node().getTotalLength();
 
@@ -145,10 +174,10 @@
             .attr("stroke-dashoffset", 0);
 
 
-        var dataPath2 = svg.append("path")
+        var dataPath2 = graph.append("path")
             .attr("d", line(eventData))
             .attr('fill', 'none')
-            .attr('stroke', 'rgb(14, 80, 14')
+            .attr('stroke', 'rgb(100, 150, 100')
             .attr('stroke-width', '2');
 
         var totalLength = dataPath2.node().getTotalLength();
@@ -157,36 +186,70 @@
             .attr("stroke-dasharray", totalLength + " " + totalLength)
             .attr("stroke-dashoffset", totalLength)
             .transition()
-            .delay(30)
+            .delay(70)
             .duration(20000)
             .ease("linear")
             .attr("stroke-dashoffset", 0);
-
         }
+
 
 
 //--------------------------
     function createSlider() {
+
+
         var brush = d3.svg.brush()
             .x(scales.x)
-            .extent([0,0])
-            .on("brush", 'bushed')
+            .extent([eventData.length, eventData.length])
+            .on('brush', brushed);
 
-        var slider = svg.append("g")
-            .attr("class", "slider")
+        var slider = svgLine.append('g')
+            .attr('class', 'slider')
             .call(brush);
-        slider.selectAll(".extent,.resize")
-            .remove();
 
-        var handle = slider.append("circle")
-            .attr("class", "handle")
-            .attr("transform", "translate(0, " + height / 2 + ")")
-            .attr("r", 9);
+        slider.selectAll('.extent, .resize').remove();
+        slider.select('.background').attr('height', height2);
+
+        var handle = slider.append('g')
+            .attr('class', 'handle');
+        handle.append('path')
+            .attr('transform', 'translate(0,' + height2 + ')')
+            .datum([
+                [-35, 0],
+                [-35, 28],
+                [35, 22],
+                [35, 0]
+            ])
+            .attr('d', d3.svg.area());
+        handle.append('text')
+            .attr('text-anchor', 'middle')
+            .attr('y', height2 + 17)
+            .text(2014);
+slider.call(brush.event);
+
+   function brushed(){
+       var year = brush.extent()[0];
+
+       if (d3.event.sourceEvent){
+           year = (scales.x.invert(d3.mouse(this)[0]));
+
+       }
+       brush.extent([year, year]);
+       var xPos = scales.x(year);
+       handle
+           .attr('transform', 'translate('+xPos+'0)')
+           .select('text')
+           .text(year);
+
+
+
+
+
+
+   }
+
 
     }
-
-
-
 
 
 }).call(this);
