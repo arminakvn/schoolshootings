@@ -3,7 +3,8 @@
 
 
     var margin = {t:20,r:50,b:80,l:50},
-        margin2 = {t:30,b:100};
+        margin2 = {t:30,r:100, b:100, l:100};
+
         width = $('.canvas').width() - margin.l - margin.r,
         height = $('.canvas').height() - margin.t - margin.b,
         height2 = margin.b - margin2.t - margin2.b;
@@ -31,7 +32,7 @@
 //----------------------------------------------------------------------above is the global variable so that you can use it in multiple functions
     var scales= {};
     scales.r = d3.scale.sqrt().domain([0, 70]).range([0,17]);
-    scales.x = d3.time.scale().range([0, width/1.7]).clamp(true);
+    scales.x = d3.time.scale().range([0, width/1.1]).clamp(true);
     scales.y = d3.scale.linear().domain([0, 75]).range([height, 0]);
 
 //----------------------------------------------------------------------
@@ -108,25 +109,8 @@
         var maxDate = eventData[eventData.length - 1].date;
         console.log(minDate, maxDate);
 
-
-//        //construct an x-y series for line plot
-//        var timeSeries = [];
-//        for(var i=1967; i<=2014; i++){
-//
-//            timeSeries.push({
-//               date: i,
-//               amount:
-//            });
-//        }
-//        drawTimeSeries(timeSeries);
-
-
-
         drawTimeSeries(eventData);
         createSlider();
-
-
-
 
     }
 
@@ -154,8 +138,6 @@
                 .attr('stroke-width', '2')
                 .attr("stroke-dashoffset", 0);
 
-
-
         var dataPath = graph.append("path")
             .attr("d", line(eventData))
             .attr('fill', 'none')
@@ -172,7 +154,6 @@
             .duration(20000)
             .ease("linear")
             .attr("stroke-dashoffset", 0);
-
 
         var dataPath2 = graph.append("path")
             .attr("d", line(eventData))
@@ -197,7 +178,6 @@
 //--------------------------
     function createSlider() {
 
-
         var brush = d3.svg.brush()
             .x(scales.x)
             .extent([eventData.length, eventData.length])
@@ -208,7 +188,7 @@
             .call(brush);
 
         slider.selectAll('.extent, .resize').remove();
-        slider.select('.background').attr('height', height2);
+        slider.select('.canvas').attr('height', height2);
 
         var handle = slider.append('g')
             .attr('class', 'handle');
@@ -216,15 +196,15 @@
             .attr('transform', 'translate(0,' + height2 + ')')
             .datum([
                 [-35, 0],
-                [-35, 28],
+                [-35, 22],
                 [35, 22],
                 [35, 0]
             ])
             .attr('d', d3.svg.area());
         handle.append('text')
             .attr('text-anchor', 'middle')
-            .attr('y', height2 + 17)
-            .text(2014);
+            .attr('y', height2)
+
 slider.call(brush.event);
 
    function brushed(){
@@ -240,11 +220,6 @@ slider.call(brush.event);
            .attr('transform', 'translate('+xPos+'0)')
            .select('text')
            .text(year);
-
-
-
-
-
 
    }
 
