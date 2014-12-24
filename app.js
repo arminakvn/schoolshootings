@@ -26,21 +26,7 @@
     scales.y = d3.scale.linear().domain([0, 75]).range([height, 0]);
 
 //----------------------------------------------------------------------
-    var brush = d3.svg.brush()
-        .x(scales.x)
-        .extent([0,0])
-        .on("brush", brushed)
 
-    var slider = svg.append("g")
-        .attr("class", "slider")
-        .call(brush);
-    slider.selectAll(".extent,.resize")
-        .remove();
-
-    var handle = slider.append("circle")
-        .attr("class", "handle")
-        .attr("transform", "translate(0, " + height / 2 + ")")
-        .attr("r", 9);
 
 
 
@@ -140,12 +126,62 @@
                 .attr('stroke-width', '2')
                 .attr("stroke-dashoffset", 0);
 
+        var dataPath = svg.append("path")
+            .attr("d", line(eventData))
+            .attr('fill', 'none')
+            .attr('stroke', 'rgb(170, 270, 170')
+            .attr('stroke-width', '2');
+
+
+        var totalLength = dataPath.node().getTotalLength();
+
+        dataPath
+            .attr("stroke-dasharray", totalLength + " " + totalLength)
+            .attr("stroke-dashoffset", totalLength)
+            .transition()
+            .delay(30)
+            .duration(20000)
+            .ease("linear")
+            .attr("stroke-dashoffset", 0);
+
+
+        var dataPath2 = svg.append("path")
+            .attr("d", line(eventData))
+            .attr('fill', 'none')
+            .attr('stroke', 'rgb(14, 80, 14')
+            .attr('stroke-width', '2');
+
+        var totalLength = dataPath2.node().getTotalLength();
+
+        dataPath2
+            .attr("stroke-dasharray", totalLength + " " + totalLength)
+            .attr("stroke-dashoffset", totalLength)
+            .transition()
+            .delay(30)
+            .duration(20000)
+            .ease("linear")
+            .attr("stroke-dashoffset", 0);
+
         }
 
 
 //--------------------------
     function createSlider() {
+        var brush = d3.svg.brush()
+            .x(scales.x)
+            .extent([0,0])
+            .on("brush", 'bushed')
 
+        var slider = svg.append("g")
+            .attr("class", "slider")
+            .call(brush);
+        slider.selectAll(".extent,.resize")
+            .remove();
+
+        var handle = slider.append("circle")
+            .attr("class", "handle")
+            .attr("transform", "translate(0, " + height / 2 + ")")
+            .attr("r", 9);
 
     }
 

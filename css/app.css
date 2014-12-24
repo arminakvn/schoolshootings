@@ -7,10 +7,10 @@
     color: black;
 }*/
 div {
-      background: #333;
-      margin-bottom: 10px;
+      /*background: #333;*/
+      /*margin-bottom: 10px;*/
       /*padding: 7px;*/
-      color: #fff;
+      /*color: #fff;*/
       font-family: Arial;
       font-size: 12px;
     }
@@ -32,30 +32,41 @@ body{
     font-family: 'Open Sans Condensed', sans-serif;
     font-size: 30px;
     height: 100%;
-    position: relative;
-    background: rgb(80,80,80);
-}
-.header{
     width:100%;
-    height:4%;
-    padding-bottom:20px;
+    position: relative;
+    background: rgb(250,250,250);
 }
+
 .container{
     width:100%;
     height:100%;
 }
 
 /*----------------------canvas-----------------------------------------*/
-.container .canvas {
+.canvas{
+    width:80%;
+    height:90%;
+    margin-left:30px;
+    top:30px;
+    border-radius:7px;
+    position:relative;
+    background: rgb(250,250,250);
+    border-style: solid;
+    border-width: 1px;
+
+}
+.lineGraph {
     width:60%;
     height:200px;
     margin-left:35%;
-    top:400px;
+    top:20%;
     border-radius:7px;
     position:relative;
-    background: rgb(20,20,20);
+    border-style: solid;
+    border-width: 1px;
+    background:none;
 }
-.canvas .timeBar{
+.timeBar{
     width:15%;
     height:40px;
     float:right;
@@ -66,6 +77,15 @@ body{
 
     font-family: Arial;
     font-size: 12px;
+}
+.container .control{
+    width:171px;
+    height:100px;
+    left:0px;
+    margin-top:20px;
+    position:absolute;
+    float:left;
+
 }
 
 /*----------------------font-----------------------------------------*/
@@ -95,10 +115,9 @@ h3{
 
 
 /*----------------------control-----------------------------------------*/
-
 .control .button{
-    color: rgb(70,70,70);
-    background-color: rgb(50,50,50);
+    color: #00ff00;
+    background-color:rgb(30,30,30);
     font-size: .6em;
     height:35px;
     width:100%;
@@ -110,22 +129,6 @@ h3{
     margin-top:3px;
 }
 .button:hover {
-    background: rgb(60,60,60);
-    color: rgb(141, 255, 141)
-}
-.control .buttonMain{
-    color: #00ff00;
-    font-size: .6em;
-    height:35px;
-    width:100%;
-    position:relative;
-    float:left;
-    padding-left:20px;
-    line-height:35px;
-    border-radius:7px;
-    margin-top:3px;
-}
-.buttonMain:hover {
     background: rgb(60,60,60);
     color: rgb(141, 255, 141)
 }
