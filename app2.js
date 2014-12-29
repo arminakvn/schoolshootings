@@ -2,15 +2,15 @@
 (function() {
 
 
-    var margin = {t: 10, r: 10, b: 100, l: 40},
-        margin2 = {t: 430, r: 10, b: 20, l: 40},
+    var margin = {t: 10, r: 10, b: 80, l: 40},
+        margin2 = {t: 230, r: 10, b: 20, l: 40},
         width = $('.canvas').width() - margin.l - margin.r,
         height = $('.canvas').height() - margin.t - margin.b
         height2 = $('.canvas').height() - margin2.t - margin2.b;
 
 
     var eventData;
-
+    var circleGroup;
 
     var parseDate = d3.time.format("%m/%d/%y").parse;
 //----------------------------------------------------------------------above is the global variable so that you can use it in multiple functions
@@ -23,6 +23,11 @@
     scales.y2 = d3.scale.linear().domain([0, 75]).range([height2, 0]);
 
 //----------------------------------------------------------------------
+    map_el = $("body").append("<div id='map'></div>");
+
+    L.mapbox.accessToken = "pk.eyJ1IjoiYXJtaW5hdm4iLCJhIjoiSTFteE9EOCJ9.iDzgmNaITa0-q-H_jw1lJw";
+
+    map = L.mapbox.map("map", "arminavn.ib1f592g").setView([40, -74.50], 9);
 
     var xAxis = d3.svg.axis().scale(scales.x).orient('bottom').tickSize(-height, 0).tickSubdivide(true),
         xAxis2 = d3.svg.axis().scale(scales.x2).orient('bottom').tickSize(-height2, 0).tickSubdivide(true),
@@ -33,17 +38,20 @@
         .on("brush", brushed);
 
     var line = d3.svg.line()
-        .interpolate("monotone")
+        .interpolate("linear")
         .x(function(d) { return scales.x(d.date); })
         .y(function(d) { return scales.y(d.totalVictims); });
 
     var line2 = d3.svg.line()
-        .interpolate("monotone")
+        .interpolate("linear")
         .x(function(d) { return scales.x2(d.date); })
         .y(function(d) { return scales.y2(d.totalVictims); });
 
+//    var node = d3.svg()
+//        .x(function(d) { return scales.x(d.date); })
+//        .y(function(d) { return scales.y(d.totalVictims); });
 
-    var svg = d3.select("body").append("svg")
+    var svg = d3.select(".canvas").append("svg")
         .attr("width", width + margin.l + margin.r)
         .attr("height", height + margin.t + margin.b);
 
@@ -125,6 +133,21 @@
             .attr("class", "line")
             .attr("d", line);
 
+        circleGroup = focus.append("g");
+        circleGroup.attr("clip-path", "url(#clip)");
+        circleGroup.selectAll('.dot')
+            .data(eventData)
+            .enter().append("circle")
+            .attr('class', 'dot')
+            .attr("cx",function(d){ return scales.x(d.date);})
+            .attr("cy", function(d){ return scales.y(d.totalVictims);})
+            .attr("r", function(d){ return 3;})
+            .on('mouseover', function(d){ d3.select(this).attr('r', 8)})
+            .on('mouseout', function(d){ d3.select(this).attr('r', 3)})
+            .on('mouseenter', onMouseEnter)
+            .on('mouseleave', onMouseLeave);
+
+
         focus.append("g")
             .attr("class", "x axis")
             .attr("transform", "translate(0," + height + ")")
@@ -157,33 +180,33 @@
         scales.x.domain(brush.empty() ? scales.x2.domain() : brush.extent());
         focus.select(".line").attr("d", line);
         focus.select(".x.axis").call(xAxis);
+        circleGroup.selectAll(".dot").attr("cx",function(d){ return scales.x(d.date)}).attr("cy", function(d){ return scales.y(d.totalVictims)});
     }
 
 
-//    function onMouseEnter(d) {
-//
-//        var container = d3.select('.canvas').node();
-//        var mouse = d3.mouse(container);
-//
-//        var tooltip = d3.select('.tooltip')
-//            .style('visibility', 'visible');
-//
-//        tooltip
-//
-//            .select('h2').html(d.name + "<br/>" + "desc: "+d.description +"<br/>" + "wounded: "+ d.wound + "<br/>" + "year: "+ d.yr)
-//
-//
-//        var tooltipWidth = $('.tooltip').width();
-//
-//        tooltip
-//            .style('left', mouse[0] - tooltipWidth / 2 + 'px')
-//            .style('top', mouse[1] - 80 + 'px');
-//
-//    }
-//
-//    function onMouseLeave(d) {
-//        d3.select('.tooltip')
-//            .style('visibility', 'hidden');
-//
-//    }
+    function onMouseEnter(d) {
+
+        var container = d3.select('.canvas').node();
+        var mouse = d3.mouse(container);
+
+        var tooltip = d3.select('.tooltip')
+            .style('visibility', 'visible');
+
+        tooltip
+
+            .select('h2').html(d.name + "<br/>" + "desc: "+d.description +"<br/>" + "wounded: "+ d.wound + "<br/>" + "year: "+ d.date)
+
+console.log(d);
+        map.setView(new L.LatLng(d.lat, d.lng), 18);
+        var tooltipWidth = $('.tooltip').width();
+
+
+
+    }
+
+    function onMouseLeave(d) {
+        d3.select('.tooltip')
+            .style('visibility', 'hidden');
+
+    }
 }).call(this);
