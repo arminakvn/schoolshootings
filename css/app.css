@@ -17,8 +17,8 @@ div {
 .paratext-info {
     padding: 6px 8px;
     font: 14px/16px Arial, Helvetica, sans-serif;
-    background: white;
-    background: rgba(255,255,255,0.8);
+    /*background: white;*/
+    /*background: rgba(255,255,255,0.8);*/
     box-shadow: 0 0 15px rgba(0,0,0,0.2);
     border-radius: 5px;
 }
@@ -34,7 +34,7 @@ body{
     height: 100%;
     width:100%;
     position: relative;
-    background: rgb(250,250,250);
+    /*background: rgb(250,250,250);*/
 }
 
 .container{
@@ -193,7 +193,7 @@ h3{
     fill:rgb(50,50,50);
     /*nob text*/
 }
-a:link {color: rgb(90,90,90);; text-decoration:none;}
+a:link {color: rgb(90,90,90); text-decoration:none;}
 a:visited {color: rgb(90,90,90); text-decoration:none;}
 a:hover {text-decoration:none;}
 a:active{color: rgb(150,150,150)text-decoration:none;}
