@@ -2,12 +2,11 @@
 (function() {
 
 
-    var margin = {t:20,r:100,b:60,l:50},
-        margin2 = {t:30,r:70, b:100, l:70};
-        width = $('.canvas').width() - margin.l - margin.r,
-        width2= $('.canvas').width() - margin2.l - margin2.r,
-        height = $('.canvas').height() - margin.b - margin.t,
-        height2 = margin.b - margin2.t - margin2.b;
+    var margin = {t: 10, r: 10, b: 100, l: 40},
+        margin2 = {t: 430, r: 10, b: 20, l: 40},
+        width = 960 - margin.l - margin.r,
+        height = 500 - margin.t - margin.b
+        height2 = 500 - margin2.t - margin2.b;
 
 
     var svg = d3.select('.canvas')
@@ -52,59 +51,6 @@
         .append('g')
         .attr('class','time-series')
         .attr('transform', 'translate('+margin.l + ',' + (margin.t+$('.canvas').height()+margin2.t) + ')');
-
-//for slider part-----------------------------------------------------------------------------------
-
-    var context = svg.append("g") // Brushing context box container
-        .attr("transform", "translate(" + 0 + "," + 410 + ")")
-        .attr("class", "context");
-
-//append clip path for lines plotted, hiding those part out of bounds
-    svg.append("defs")
-        .append("clipPath")
-        .attr("id", "clip")
-        .append("rect")
-        .attr("width", width)
-        .attr("height", height);
-    // Create invisible rect for mouse tracking
-    svg.append("rect")
-        .attr("width", width)
-        .attr("height", height)
-        .attr("x", 0)
-        .attr("y", 0)
-        .attr("id", "mouse-tracker")
-        .style("fill", "white");
-
-    var brush = d3.svg.brush()
-        .x(scales.x2)
-        .on("brush", brushed);
-
-    context.append("g") //brushing axis
-        .attr("class", "x axis")
-        .attr("transform", "translate(0," + height2 + ")")
-        .call(xAxis);
-
-    var contextArea = d3.svg.area()
-        .interpolate("monotone")
-        .x(function(d){ return scales.x2(d.date); })
-        .y0(height2) //bottom line begins at height2
-        .y1(0) //top line of area
-
-//    context.append("path") // Path is created using svg.area details
-//        .attr("class", "area")
-//        .attr("d", line(eventData)) // pass first categories data .values to area path generator
-//        .attr("fill", "#F1F1F2");
-
-    context.append("g")
-        .attr("class", "x brush")
-        .call(brush)
-        .selectAll("rect")
-        .attr("height", height2)
-        .attr("fill", "#E6E7E8");
-
-
-
-
 
 
 
@@ -159,14 +105,14 @@
         maxDate = eventData[eventData.length - 1].date;
         console.log(minDate, maxDate);
 
-        drawTimeSeries(eventData);
-        createSlider(eventData);
+        drawTimeSeries();
+        drawGraph(eventData);
 
 
     }
 
 //--------------------------line graph function--------------------------------------------
-    function drawTimeSeries(eventData) {
+    function drawGraph(eventData) {
         console.log(eventData);
 
         var dataPoints = svg.selectAll(".circles")
@@ -176,14 +122,11 @@
             .attr('class', 'circle')
             .attr('cx', function(d) { return scales.x(d.date); })
             .attr('cy', function(d) { return scales.y(d.totalVictims); })
-            .attr('r',function(d){
-                return scales.cSize(d.totalVictims);
-            })
+            .attr('r',function(d){ return scales.cSize(d.totalVictims);})
             .attr('fill', 'white')
             .attr('stroke', 'steelblue')
             .attr('stroke-width',.5)
-            .on('mouseenter', onMouseEnter)
-            .on('mouseleave', onMouseLeave);
+
 
         var dataPath = svg.append("path")
             .attr("d", line(eventData))
@@ -195,7 +138,7 @@
 
 
 //--------------------------
-    function createSlider(eventData) {
+    function drawTimeSeries() {
 
         svgLine.append('g')
             .attr('class', 'axis x')
@@ -209,35 +152,35 @@
 
         svgLine.append('g')
             .attr('class', 'graphing')
-            .call(drawTimeSeries);
+            .call(drawGraph);
 
     }
 
 
-    function onMouseEnter(d) {
-
-        var container = d3.select('.canvas').node();
-        var mouse = d3.mouse(container);
-
-        var tooltip = d3.select('.tooltip')
-            .style('visibility', 'visible');
-
-        tooltip
-
-            .select('h2').html(d.name + "<br/>" + "desc: "+d.description +"<br/>" + "wounded: "+ d.wound + "<br/>" + "year: "+ d.yr)
-
-
-        var tooltipWidth = $('.tooltip').width();
-
-        tooltip
-            .style('left', mouse[0] - tooltipWidth / 2 + 'px')
-            .style('top', mouse[1] - 80 + 'px');
-
-    }
-
-    function onMouseLeave(d) {
-        d3.select('.tooltip')
-            .style('visibility', 'hidden');
-
-    }
+//    function onMouseEnter(d) {
+//
+//        var container = d3.select('.canvas').node();
+//        var mouse = d3.mouse(container);
+//
+//        var tooltip = d3.select('.tooltip')
+//            .style('visibility', 'visible');
+//
+//        tooltip
+//
+//            .select('h2').html(d.name + "<br/>" + "desc: "+d.description +"<br/>" + "wounded: "+ d.wound + "<br/>" + "year: "+ d.yr)
+//
+//
+//        var tooltipWidth = $('.tooltip').width();
+//
+//        tooltip
+//            .style('left', mouse[0] - tooltipWidth / 2 + 'px')
+//            .style('top', mouse[1] - 80 + 'px');
+//
+//    }
+//
+//    function onMouseLeave(d) {
+//        d3.select('.tooltip')
+//            .style('visibility', 'hidden');
+//
+//    }
 }).call(this);
