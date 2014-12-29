@@ -107,7 +107,6 @@
     maxDate = eventData[eventData.length - 1].date;
     console.log(minDate, maxDate);
     drawGraph();
-    drawTimeSeries(eventData);
     createSlider(eventData);
   };
 //----------------------dataLoadedEnd
@@ -137,18 +136,37 @@
 
   createSlider = function(eventData) {
     var brush, brushed, handle, handleSlides, slider;
-    brush = d3.svg.brush().x(scales.x).extent([eventData.length, eventData.length]).on("brush", brushed);
-    slider = svgLine.append("g").attr("class", "slider").call(brush);
-    slider.selectAll(".extent, .resize").remove();
-    slider.select(".canvas").attr("height", height2);
-    handle = slider.append("g").attr("class", "handle");
-    handle.append("path").attr("transform", "translate(0," + height2 + ")").datum([[-35, 0], [-35, 22], [35, 22], [35, 0]]).attr("d", d3.svg.area());
-    handle.append("text").attr("text-anchor", "middle").attr("y", height2);
+
+    brush = d3.svg.brush()
+        .x(scales.x).extent([eventData.length, eventData.length])
+        .on("brush", brushed);
+
+    slider = svgLine.append("g")
+        .attr("class", "slider")
+        .call(brush);
+
+    slider.selectAll(".extent, .resize")
+        .remove();
+    slider.select(".canvas")
+        .attr("height", height2);
+    handle = slider.append("g")
+        .attr("class", "handle");
+
+      handle.append("path")
+        .attr("transform", "translate(0," + height2 + ")")
+        .datum([[-35, 0], [-35, 22], [35, 22], [35, 0]])
+        .attr("d", d3.svg.area());
+
+    handle.append("text")
+        .attr("text-anchor", "middle")
+        .attr("y", height2);
+
     hendleSlides = (function(_this) {
       return function() {
         console.log("inside handle slide");
       };
     })(this);
+
     brushed = (function(_this) {
       return function() {
         var xPos, year;
@@ -158,7 +176,10 @@
         }
         brush.extent([year, year]);
         xPos = scales.x(year);
-        handle.attr("transform", "translate(" + xPos + "0)").select("text").text(year).call(hendleSlides);
+        handle.attr("transform", "translate(" + xPos + "0)")
+            .select("text")
+            .text(year)
+            .call(hendleSlides);
       };
     })(this);
     slider.call(brush.event);
@@ -187,47 +208,5 @@
         .attr("stroke-dashoffset", 0);
   };
 
-  drawTimeSeries = function(eventData) {
-
-    var dataPath, dataPath2, totalLength;
-    console.log("eventData", eventData);
-    console.log("graph", graph);
-
-    dataPath = graph.append("path")
-        .attr("d", line(eventData))
-        .attr("fill", "none")
-        .attr("stroke", "rgb(170, 270, 170")
-        .attr("stroke-width", "2");
-
-    totalLength = dataPath.node().getTotalLength();
-
-    console.log("totalLength", totalLength);
-
-    dataPath
-        .attr("stroke-dasharray", totalLength + " " + totalLength)
-        .attr("stroke-dashoffset", totalLength)
-        .transition()
-        .delay(30)
-        .duration(20000)
-        .ease("linear")
-        .attr("stroke-dashoffset", 0);
-
-    dataPath2 = graph.append("path")
-        .attr("d", line(eventData))
-        .attr("fill", "none")
-        .attr("stroke", "rgb(100, 150, 100)")
-        .attr("stroke-width", "2");
-
-    totalLength = dataPath2.node().getTotalLength();
-
-    dataPath2
-        .attr("stroke-dasharray", totalLength + " " + totalLength)
-        .attr("stroke-dashoffset", totalLength)
-        .transition()
-        .delay(70)
-        .duration(20000)
-        .ease("linear")
-        .attr("stroke-dashoffset", 0);
-  };
 
 }).call(this);
