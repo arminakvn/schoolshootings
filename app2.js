@@ -5,18 +5,12 @@
     var margin = {t:20,r:100,b:60,l:50},
         margin2 = {t:30,r:70, b:100, l:70};
         width = $('.canvas').width() - margin.l - margin.r,
+        width2= $('.canvas').width() - margin2.l - margin2.r,
         height = $('.canvas').height() - margin.b - margin.t,
         height2 = margin.b - margin2.t - margin2.b;
 
 
     var svg = d3.select('.canvas')
-        .append('svg')
-        .attr('width', width + margin.l + margin.r)
-        .attr('height', height + margin.t + margin.b)
-        .append('g')
-        .attr('transform',"translate("+margin.l+","+margin.t+")");
-
-    var graph = d3.select('.lineGraph')
         .append('svg')
         .attr('width', width + margin.l + margin.r)
         .attr('height', height + margin.t + margin.b)
@@ -33,6 +27,7 @@
     scales.cSize = d3.scale.sqrt().domain([0, 100]).range([0,20]);
     scales.r = d3.scale.sqrt().domain([0, 70]).range([0,17]);
     scales.x = d3.time.scale().range([0, width/1.1]).clamp(true);
+    scales.x2 = (scales.x.domain());
     scales.y = d3.scale.linear().domain([0, 75]).range([height, 0]);
 
 //----------------------------------------------------------------------
@@ -56,7 +51,61 @@
     var svgLine = svg
         .append('g')
         .attr('class','time-series')
-        .attr('transform', 'translate('+margin.l + ',' + (margin.t+height+margin2.t) + ')');
+        .attr('transform', 'translate('+margin.l + ',' + (margin.t+$('.canvas').height()+margin2.t) + ')');
+
+//for slider part-----------------------------------------------------------------------------------
+
+    var context = svg.append("g") // Brushing context box container
+        .attr("transform", "translate(" + 0 + "," + 410 + ")")
+        .attr("class", "context");
+
+//append clip path for lines plotted, hiding those part out of bounds
+    svg.append("defs")
+        .append("clipPath")
+        .attr("id", "clip")
+        .append("rect")
+        .attr("width", width)
+        .attr("height", height);
+    // Create invisible rect for mouse tracking
+    svg.append("rect")
+        .attr("width", width)
+        .attr("height", height)
+        .attr("x", 0)
+        .attr("y", 0)
+        .attr("id", "mouse-tracker")
+        .style("fill", "white");
+
+    var brush = d3.svg.brush()
+        .x(scales.x2)
+        .on("brush", brushed);
+
+    context.append("g") //brushing axis
+        .attr("class", "x axis")
+        .attr("transform", "translate(0," + height2 + ")")
+        .call(xAxis);
+
+    var contextArea = d3.svg.area()
+        .interpolate("monotone")
+        .x(function(d){ return scales.x2(d.date); })
+        .y0(height2) //bottom line begins at height2
+        .y1(0) //top line of area
+
+//    context.append("path") // Path is created using svg.area details
+//        .attr("class", "area")
+//        .attr("d", line(eventData)) // pass first categories data .values to area path generator
+//        .attr("fill", "#F1F1F2");
+
+    context.append("g")
+        .attr("class", "x brush")
+        .call(brush)
+        .selectAll("rect")
+        .attr("height", height2)
+        .attr("fill", "#E6E7E8");
+
+
+
+
+
 
 
 //----------------------------------------------------------------------
@@ -92,7 +141,6 @@
     function dataLoaded(err, us, data) {
         if (err) console.error(err);
 
-        usTopoJson = us;
         eventData = data;
 
         eventData.forEach(function(d) {
@@ -112,11 +160,8 @@
         console.log(minDate, maxDate);
 
         drawTimeSeries(eventData);
+        createSlider(eventData);
 
-        createSlider();
-
-
-        console.log(usTopoJson);
 
     }
 
@@ -125,7 +170,7 @@
         console.log(eventData);
 
         var dataPoints = svg.selectAll(".circles")
-            .data (eventData)
+            .data(eventData)
             .enter()
             .append("circle")
             .attr('class', 'circle')
@@ -146,12 +191,11 @@
             .attr('stroke', 'rgb(14, 80, 14')
             .attr('stroke-width', '2')
 
-
     }
 
 
 //--------------------------
-    function createSlider() {
+    function createSlider(eventData) {
 
         svgLine.append('g')
             .attr('class', 'axis x')
@@ -166,53 +210,6 @@
         svgLine.append('g')
             .attr('class', 'graphing')
             .call(drawTimeSeries);
-
-        var brush = d3.svg.brush()
-            .x(scales.x)
-            .extent([0, 0])
-            .on('brush', brushed);
-
-        var slider = svgLine.append('g')
-            .attr('class', 'slider')
-            .call(brush);
-
-        slider.selectAll('.extent, .resize').remove();
-        slider.select('.canvas').attr('height', height2);
-
-        var handle = slider.append('g')
-            .attr('class', 'handle');
-
-        handle.append('path')
-            .attr('transform', 'translate(0,' + height2 + ')')
-            .datum([
-                [-35, 0],
-                [-35, 22],
-                [35, 22],
-                [35, 0]
-            ])
-            .attr('d', d3.svg.area());
-        handle.append('text')
-            .attr('text-anchor', 'middle')
-            .attr('y', height2)
-
-        slider.call(brush.event);
-
-        function brushed() {
-            var date = brush.extent()[minDate, maxDate];
-
-            if (d3.event.sourceEvent) {
-                date = (scales.x.invert(d3.mouse(this)[0]));
-
-            }
-            brush.extent([date, date]);
-            var xPos = scales.x(date);
-            handle
-                .attr('transform', 'translate(' + xPos + '0)')
-                .select('text')
-                .text(date)
-
-        }
-        brush.on()
 
     }
 
