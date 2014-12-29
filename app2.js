@@ -4,20 +4,19 @@
 
     var margin = {t: 10, r: 10, b: 100, l: 40},
         margin2 = {t: 430, r: 10, b: 20, l: 40},
-        width = 960 - margin.l - margin.r,
-        height = 500 - margin.t - margin.b
-        height2 = 500 - margin2.t - margin2.b;
+        width = $('.canvas').width() - margin.l - margin.r,
+        height = $('.canvas').height() - margin.t - margin.b
+        height2 = $('.canvas').height() - margin2.t - margin2.b;
 
 
-    var svg = d3.select('.canvas')
-        .append('svg')
-        .attr('width', width + margin.l + margin.r)
-        .attr('height', height + margin.t + margin.b)
-        .append('g')
-        .attr('transform',"translate("+margin.l+","+margin.t+")");
+//    var svg = d3.select('.canvas')
+//        .append('svg')
+//        .attr('width', width + margin.l + margin.r)
+//        .attr('height', height + margin.t + margin.b)
+//        .append('g')
+//        .attr('transform',"translate("+margin.l+","+margin.t+")");
 
     var eventData;
-    var usTopoJson;
     var maxDate, minDate;
 
     var parseDate = d3.time.format("%m/%d/%y").parse;
@@ -25,33 +24,51 @@
     var scales= {};
     scales.cSize = d3.scale.sqrt().domain([0, 100]).range([0,20]);
     scales.r = d3.scale.sqrt().domain([0, 70]).range([0,17]);
-    scales.x = d3.time.scale().range([0, width/1.1]).clamp(true);
-    scales.x2 = (scales.x.domain());
+    scales.x = d3.time.scale().range([0, width]).clamp(true);
+    scales.x2 = d3.time.scale().range([0, width]).clamp(true);
     scales.y = d3.scale.linear().domain([0, 75]).range([height, 0]);
+    scales.y2 = d3.scale.linear().domain([0, 75]).range([height, 0]);
 
 //----------------------------------------------------------------------
 
-    var xAxis = d3.svg.axis()
-        .scale(scales.x)
-        .orient('bottom')
-        .tickSize(-height, 0)
-        .orient("bottom")
-        .tickSubdivide(true)
+    var xAxis = d3.svg.axis().scale(scales.x).orient('bottom').tickSize(-height, 0).tickSubdivide(true),
+        xAxis2 = d3.svg.axis().scale(scales.x2).orient('bottom').tickSize(-height, 0).tickSubdivide(true),
+        yAxis = d3.svg.axis().scale(scales.y).tickSize(-width, 0).orient("left");
 
-    var yAxis = d3.svg.axis()
-        .scale(scales.y)
-        .tickSize(-width, 0)
-        .orient("left");
+    var brush = d3.svg.brush()
+        .x(scales.x2)
+        .on("brush", brushed);
 
     var line = d3.svg.line()
-        .x(function(d){return scales.x(d.date)})
-        .y(function(d){return scales.y(d.totalVictims)});
+        .interpolate("monotone")
+        .x(function(d) { return scales.x(d.date); })
+//        .y0(height)
+        .y(function(d) { return scales.y(d.totalVictims); });
 
-    var svgLine = svg
-        .append('g')
-        .attr('class','time-series')
-        .attr('transform', 'translate('+margin.l + ',' + (margin.t+$('.canvas').height()+margin2.t) + ')');
+    var line2 = d3.svg.line()
+        .interpolate("monotone")
+        .x(function(d) { return scales.x2(d.date); })
+//        .y0(height2)
+        .y(function(d) { return scales.y2(d.totalVictims); });
 
+
+    var svg = d3.select("body").append("svg")
+        .attr("width", width + margin.l + margin.r)
+        .attr("height", height + margin.t + margin.b);
+
+    svg.append("defs").append("clipPath")
+        .attr("id", "clip")
+        .append("rect")
+        .attr("width", width)
+        .attr("height", height);
+
+    var focus = svg.append("g")
+        .attr("class", "focus")
+        .attr("transform", "translate(" + margin.l + "," + margin.t + ")");
+
+    var context = svg.append("g")
+        .attr("class", "context")
+        .attr("transform", "translate(" + margin2.l + "," + margin2.t + ")");
 
 
 //----------------------------------------------------------------------
@@ -98,14 +115,16 @@
         console.log("right after event data",eventData);
         console.log(d3.time.format("%m/%d/%Y"));
 
-//        scales.x2.domain(d3.extent(eventData, function(d){return d.date; }));
-        scales.x.domain(d3.extent(eventData, function(d){return d.date; }));
+        scales.x.domain(d3.extent(eventData.map(function(d) { return d.date; })));
+        scales.y.domain([0, d3.max(eventData.map(function(d) { return d.totalVictims; }))]);
+        scales.x2.domain(scales.x.domain());
+        scales.y2.domain(scales.y.domain());
 
         minDate = eventData[0].date;
         maxDate = eventData[eventData.length - 1].date;
         console.log(minDate, maxDate);
 
-        drawTimeSeries();
+        drawTimeSeries(eventData);
         drawGraph(eventData);
 
 
@@ -138,22 +157,51 @@
 
 
 //--------------------------
-    function drawTimeSeries() {
+    function drawTimeSeries(eventData) {
 
-        svgLine.append('g')
-            .attr('class', 'axis x')
-            .attr('transform', 'translate(0,' + height2 + ')')
+        focus.append("path")
+            .datum(eventData)
+            .attr("class", "area")
+            .attr("d", line);
+
+        focus.append("g")
+            .attr("class", "x axis")
+            .attr("transform", "translate(0," + height + ")")
             .call(xAxis);
 
-        svgLine.append('g')
-            .attr('class', 'axis y')
-            .attr('transform', 'translate(' + width + ',0)')
+        focus.append("g")
+            .attr("class", "y axis")
             .call(yAxis);
 
-        svgLine.append('g')
-            .attr('class', 'graphing')
-            .call(drawGraph);
+        context.append("path")
+            .datum(eventData)
+            .attr("class", "area")
+            .attr("d", line2);
 
+        context.append("g")
+            .attr("class", "x axis")
+            .attr("transform", "translate(0," + height2 + ")")
+            .call(xAxis2);
+
+        context.append("g")
+            .attr("class", "x brush")
+            .call(brush)
+            .selectAll("rect")
+            .attr("y", -6)
+            .attr("height", height2 + 7);
+
+    }
+
+    function brushed() {
+        x.domain(brush.empty() ? scales.x2.domain() : brush.extent());
+        focus.select(".line").attr("d", line);
+        focus.select(".x.axis").call(xAxis);
+    }
+
+    function type(d) {
+        d.date = parseDate(d.date);
+        d.price = +d.price;
+        return d;
     }
 
 
