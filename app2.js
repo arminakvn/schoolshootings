@@ -9,30 +9,23 @@
         height2 = $('.canvas').height() - margin2.t - margin2.b;
 
 
-//    var svg = d3.select('.canvas')
-//        .append('svg')
-//        .attr('width', width + margin.l + margin.r)
-//        .attr('height', height + margin.t + margin.b)
-//        .append('g')
-//        .attr('transform',"translate("+margin.l+","+margin.t+")");
-
     var eventData;
-    var maxDate, minDate;
+
 
     var parseDate = d3.time.format("%m/%d/%y").parse;
 //----------------------------------------------------------------------above is the global variable so that you can use it in multiple functions
     var scales= {};
     scales.cSize = d3.scale.sqrt().domain([0, 100]).range([0,20]);
     scales.r = d3.scale.sqrt().domain([0, 70]).range([0,17]);
-    scales.x = d3.time.scale().range([0, width]).clamp(true);
-    scales.x2 = d3.time.scale().range([0, width]).clamp(true);
+    scales.x = d3.time.scale().range([0, width]);
+    scales.x2 = d3.time.scale().range([0, width]);
     scales.y = d3.scale.linear().domain([0, 75]).range([height, 0]);
-    scales.y2 = d3.scale.linear().domain([0, 75]).range([height, 0]);
+    scales.y2 = d3.scale.linear().domain([0, 75]).range([height2, 0]);
 
 //----------------------------------------------------------------------
 
     var xAxis = d3.svg.axis().scale(scales.x).orient('bottom').tickSize(-height, 0).tickSubdivide(true),
-        xAxis2 = d3.svg.axis().scale(scales.x2).orient('bottom').tickSize(-height, 0).tickSubdivide(true),
+        xAxis2 = d3.svg.axis().scale(scales.x2).orient('bottom').tickSize(-height2, 0).tickSubdivide(true),
         yAxis = d3.svg.axis().scale(scales.y).tickSize(-width, 0).orient("left");
 
     var brush = d3.svg.brush()
@@ -42,13 +35,11 @@
     var line = d3.svg.line()
         .interpolate("monotone")
         .x(function(d) { return scales.x(d.date); })
-//        .y0(height)
         .y(function(d) { return scales.y(d.totalVictims); });
 
     var line2 = d3.svg.line()
         .interpolate("monotone")
         .x(function(d) { return scales.x2(d.date); })
-//        .y0(height2)
         .y(function(d) { return scales.y2(d.totalVictims); });
 
 
@@ -111,57 +102,27 @@
             d.date = date;
         });
 
-
         console.log("right after event data",eventData);
         console.log(d3.time.format("%m/%d/%Y"));
+
+
+        drawTimeSeries(eventData);
+
+
+    }
+
+//--------------------------
+    function drawTimeSeries(eventData) {
 
         scales.x.domain(d3.extent(eventData.map(function(d) { return d.date; })));
         scales.y.domain([0, d3.max(eventData.map(function(d) { return d.totalVictims; }))]);
         scales.x2.domain(scales.x.domain());
         scales.y2.domain(scales.y.domain());
 
-        minDate = eventData[0].date;
-        maxDate = eventData[eventData.length - 1].date;
-        console.log(minDate, maxDate);
-
-        drawTimeSeries(eventData);
-        drawGraph(eventData);
-
-
-    }
-
-//--------------------------line graph function--------------------------------------------
-    function drawGraph(eventData) {
-        console.log(eventData);
-
-        var dataPoints = svg.selectAll(".circles")
-            .data(eventData)
-            .enter()
-            .append("circle")
-            .attr('class', 'circle')
-            .attr('cx', function(d) { return scales.x(d.date); })
-            .attr('cy', function(d) { return scales.y(d.totalVictims); })
-            .attr('r',function(d){ return scales.cSize(d.totalVictims);})
-            .attr('fill', 'white')
-            .attr('stroke', 'steelblue')
-            .attr('stroke-width',.5)
-
-
-        var dataPath = svg.append("path")
-            .attr("d", line(eventData))
-            .attr('fill', 'none')
-            .attr('stroke', 'rgb(14, 80, 14')
-            .attr('stroke-width', '2')
-
-    }
-
-
-//--------------------------
-    function drawTimeSeries(eventData) {
 
         focus.append("path")
             .datum(eventData)
-            .attr("class", "area")
+            .attr("class", "line")
             .attr("d", line);
 
         focus.append("g")
@@ -175,7 +136,7 @@
 
         context.append("path")
             .datum(eventData)
-            .attr("class", "area")
+            .attr("class", "line")
             .attr("d", line2);
 
         context.append("g")
@@ -193,15 +154,9 @@
     }
 
     function brushed() {
-        x.domain(brush.empty() ? scales.x2.domain() : brush.extent());
+        scales.x.domain(brush.empty() ? scales.x2.domain() : brush.extent());
         focus.select(".line").attr("d", line);
         focus.select(".x.axis").call(xAxis);
-    }
-
-    function type(d) {
-        d.date = parseDate(d.date);
-        d.price = +d.price;
-        return d;
     }
 
 

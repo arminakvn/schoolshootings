@@ -80,28 +80,30 @@ h3{
 
 
 
-.datapoint:hover{
+.brush .extent {
+    stroke: #fff;
+    fill-opacity: .125;
+    shape-rendering: crispEdges;
+}
+svg {
+    font: 10px sans-serif;
+}
+
+.area {
     fill: steelblue;
+    clip-path: url(#clip);
 }
-/*---------------------AXES-----------------------*/
-
-.axis {shape-rendering: crispEdges;
-}
-
-.x.axis line, .x.axis path {
-    stroke: rgb(170,170,170);
-    opacity:.2;
-
-
+.line {
+stroke: steelblue;
 }
 
-
-.y.axis line, .y.axis path {
+.axis path,
+.axis line {
     fill: none;
-    stroke: rgb(70,70,70);
-    stroke-width:1px;
-
+    stroke: #000;
+    shape-rendering: crispEdges;
 }
+
 
 a:link {color: rgb(90,90,90); text-decoration:none;}
 a:visited {color: rgb(90,90,90); text-decoration:none;}
