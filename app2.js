@@ -95,7 +95,7 @@
                 description: (d["Description"] == " " ? undefined: d["Description"]),
                 lat: (+d["lat"] == " " ? undefined: +d["lat"]),
                 lng: (+d["lng"] == " " ? undefined: +d["lng"]),
-                lngLat: [+d["lng"], +d["lat"]],
+                LatLng: [+d["lat"], +d["lng"]],
                 date: (d["Date"])
             }
         })
@@ -110,14 +110,14 @@
         eventData.forEach(function(d) {
             var date = new Date(d.date);
             d.date = date;
+            d.LatLng = new L.LatLng(d.lat, d.lng)
         });
+
 
         console.log("right after event data",eventData);
         console.log(d3.time.format("%m/%d/%Y"));
-
-
+        drawPoint(eventData);
         drawTimeSeries(eventData);
-
 
     }
 
@@ -216,15 +216,40 @@
     }
 
 
-    // Use Leaflet to implement a D3 geometric transformation.
-    function projectPoint(d) {
-        var point = map.latLngToLayerPoint(new L.LatLng(d.lat, d.lng));
-        this.stream.point(point.d.lat, point.d.lng);
+
+//    function projectPoint(d) {
+//        var point = map.latLngToLayerPoint(new L.LatLng(d.lat, d.lng));
+//        this.stream.point(point.d.lat, point.d.lng);
+//    }
+//
+//    var transform = d3.geo.transform({ point: projectPoint });
+//    var path = d3.geo.path().projection(transform);
+function drawPoint(eventData){
+    console.log(map);
+    var feature = d3.select(map.getPanes().overlayPane).append("svg")
+        .attr("height", $(map.getContainer())[0].clientHeight)
+        .attr("width", $(map.getContainer())[0].clientWidth)
+        .selectAll("circle")
+        .data(eventData)
+        .enter().append("circle")
+        .style("stroke", "black")
+        .style("opacity", .6)
+        .style("fill", "red")
+        .attr("r", 2);
+    map.on("viewreset", update);
+    update();
+
+    function update() {
+        feature.attr("transform",
+            function(d) {
+                return "translate("+
+                    map.latLngToLayerPoint(d.LatLng).x +","+
+                    map.latLngToLayerPoint(d.LatLng).y +")";
+            }
+        )
     }
 
-    var transform = d3.geo.transform({ point: projectPoint });
-    var path = d3.geo.path().projection(transform);
-
+    }
 
 
 
