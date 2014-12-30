@@ -8,9 +8,9 @@
         height = $('.canvas').height() - margin.t - margin.b
         height2 = $('.canvas').height() - margin2.t - margin2.b;
 
-
     var eventData;
     var circleGroup;
+    var map;
 
     var parseDate = d3.time.format("%m/%d/%y").parse;
 //----------------------------------------------------------------------above is the global variable so that you can use it in multiple functions
@@ -27,7 +27,13 @@
 
     L.mapbox.accessToken = "pk.eyJ1IjoiYXJtaW5hdm4iLCJhIjoiSTFteE9EOCJ9.iDzgmNaITa0-q-H_jw1lJw";
 
-    map = L.mapbox.map("map", "arminavn.ib1f592g").setView([40, -74.50], 9);
+    map = L.mapbox.map("map").setView([40, -74.50], 5);
+
+    L.control.layers({
+        "Base Map": L.mapbox.tileLayer("arminavn.ib1f592g"), //satellite
+        "Open Street": L.mapbox.tileLayer("arminavn.jl495p2g").addTo(map) //street map
+    }).addTo(map);
+
 
     var xAxis = d3.svg.axis().scale(scales.x).orient('bottom').tickSize(-height, 0).tickSubdivide(true),
         xAxis2 = d3.svg.axis().scale(scales.x2).orient('bottom').tickSize(-height2, 0).tickSubdivide(true),
@@ -47,9 +53,6 @@
         .x(function(d) { return scales.x2(d.date); })
         .y(function(d) { return scales.y2(d.totalVictims); });
 
-//    var node = d3.svg()
-//        .x(function(d) { return scales.x(d.date); })
-//        .y(function(d) { return scales.y(d.totalVictims); });
 
     var svg = d3.select(".canvas").append("svg")
         .attr("width", width + margin.l + margin.r)
@@ -74,7 +77,6 @@
 
     queue()
 
-        .defer(d3.json, "data/us-10m.json")
         .defer(d3.csv, "data/MSA_Stanford_Complete_Database.csv", function(d){
             return {
                 totalVictims: (+d["Total Number of Victims"] == " " ? undefined: +d["Total Number of Victims"]),
@@ -100,7 +102,7 @@
         .await(dataLoaded);
 
 //----------------------------------------------------------------------below is when i say the global = the parses data
-    function dataLoaded(err, us, data) {
+    function dataLoaded(err, data) {
         if (err) console.error(err);
 
         eventData = data;
@@ -147,8 +149,7 @@
             .on('mouseenter', onMouseEnter)
             .on('mouseleave', onMouseLeave);
 
-
-        focus.append("g")
+        focus.append("g") //top main graph
             .attr("class", "x axis")
             .attr("transform", "translate(0," + height + ")")
             .call(xAxis);
@@ -157,7 +158,7 @@
             .attr("class", "y axis")
             .call(yAxis);
 
-        context.append("path")
+        context.append("path") //bottom brush part
             .datum(eventData)
             .attr("class", "line")
             .attr("d", line2);
@@ -173,7 +174,6 @@
             .selectAll("rect")
             .attr("y", -6)
             .attr("height", height2 + 7);
-
     }
 
     function brushed() {
@@ -194,19 +194,58 @@
 
         tooltip
 
-            .select('h2').html(d.name + "<br/>" + "desc: "+d.description +"<br/>" + "wounded: "+ d.wound + "<br/>" + "year: "+ d.date)
+            .select('h2').html(d.name + "<br/>" + "desc: " + d.description + "<br/>" + "wounded: " + d.wound + "<br/>" + "year: " + d.date)
 
-console.log(d);
-        map.setView(new L.LatLng(d.lat, d.lng), 18);
+        console.log(d);
+
+        map.setView(new L.LatLng(d.lat, d.lng), 5);
+
+
+        map.append("circle")
+            .data(eventData)
+            .enter()
+            .append("circle")
+            .attr("transform", function(d){
+                return(path)
+            })
+
         var tooltipWidth = $('.tooltip').width();
 
-
+    drawPoint(eventData);
 
     }
+
+
+    // Use Leaflet to implement a D3 geometric transformation.
+    function projectPoint(d) {
+        var point = map.latLngToLayerPoint(new L.LatLng(d.lat, d.lng));
+        this.stream.point(point.d.lat, point.d.lng);
+    }
+
+    var transform = d3.geo.transform({ point: projectPoint });
+    var path = d3.geo.path().projection(transform);
+
+
+
+
+//
+//    function drawPoint(eventData){
+//        svg.selectAll(".circle")
+//            .data(eventData)
+//            .enter()
+//            .append("circle")
+//            .attr("transform", function(d) {
+//                var xy = path(projectPoint);
+//                return 'translate(' + xy[0] + ',' + xy[1] + ')'; })
+//            .attr("r", 2);
+//
+//    }
+
 
     function onMouseLeave(d) {
         d3.select('.tooltip')
             .style('visibility', 'hidden');
 
     }
+
 }).call(this);

@@ -1,11 +1,17 @@
 /*body { margin:0; padding:0; }*/
 #map {
-			width:100%;
+			width:60%;
 			height: 500px;
 		}/*p {
     font-size: 20px;
     color: black;
 }*/
+#map2 {
+    width:100px;
+    height: 200px;
+    margin-left:20px;
+}
+
 div {
       /*background: #333;*/
       /*margin-bottom: 10px;*/
@@ -100,7 +106,7 @@ svg {
     clip-path: url(#clip);
 }
 .line {
-stroke: steelblue;
+    stroke: steelblue;
     fill:none;
 }
 
