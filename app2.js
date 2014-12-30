@@ -63,6 +63,15 @@
         .append("rect")
         .attr("width", width)
         .attr("height", height);
+    /* Initialize the SVG layer */
+    map._initPathRoot()
+
+    /* We simply pick up the SVG from the map object */
+    var svgMap = d3.select("#map").select("svg"),
+        circGroup = svgMap.append("g");
+
+//    var svgMap = d3.select(map.getPanes().overlayPane).append("svg"),
+//        g = svgMap.append("g").attr("class", "leaflet-zoom-hide");
 
     var focus = svg.append("g")
         .attr("class", "focus")
@@ -116,12 +125,12 @@
 
         console.log("right after event data",eventData);
         console.log(d3.time.format("%m/%d/%Y"));
-        drawPoint(eventData);
+
         drawTimeSeries(eventData);
 
     }
 
-//--------------------------
+//-----------------------------------------------------------
     function drawTimeSeries(eventData) {
 
         scales.x.domain(d3.extent(eventData.map(function(d) { return d.date; })));
@@ -175,9 +184,11 @@
             .attr("y", -6)
             .attr("height", height2 + 7);
 
+        drawPoint(eventData);
+
 
     }
-
+//-----------------------------------------------------------
     function brushed() {
         scales.x.domain(brush.empty() ? scales.x2.domain() : brush.extent());
         focus.select(".line").attr("d", line);
@@ -192,41 +203,25 @@
     }
 
 
-    function onMouseEnter(d) {
-
-        var container = d3.select('.canvas').node();
-        var mouse = d3.mouse(container);
-
-        var tooltip = d3.select('.tooltip')
-            .style('visibility', 'visible');
-
-        tooltip
-
-            .select('h2').html(d.name + "<br/>" + "desc: " + d.description + "<br/>" + "wounded: " + d.wound + "<br/>" + "year: " + d.date)
-
-        console.log(d);
-
-        map.setView(new L.LatLng(d.lat, d.lng), 5);
-
-        var tooltipWidth = $('.tooltip').width();
-
-    }
-
 
 function drawPoint(eventData){
+
     console.log(map);
-    var feature = d3.select(map.getPanes().overlayPane).append("svg")
-        .attr("height", $(map.getContainer())[0].clientHeight)
-        .attr("width", $(map.getContainer())[0].clientWidth)
-        .selectAll(".circle")
+    var feature = circGroup.selectAll(".circle")
+
+//    var feature = d3.select(map.getPanes().overlayPane).append("svg")
+//        .attr("height", $(map.getContainer())[0].clientHeight)
+//        .attr("width", $(map.getContainer())[0].clientWidth)
         .data(eventData)
         .enter().append("circle")
         .style("stroke", "black")
         .style("opacity", .6)
         .style("fill", "red")
         .attr("r", 2);
+
     map.on("viewreset", update);
     update();
+
 
     function update() {
         feature.attr("transform",
@@ -234,14 +229,36 @@ function drawPoint(eventData){
                 return "translate("+
                     map.latLngToLayerPoint(d.LatLng).x +","+
                     map.latLngToLayerPoint(d.LatLng).y +")";
+
             })
     }
  }
 
+    //-----------------------------------------------------------
+    function onMouseEnter(d) {
+
+        var container = d3.select('.canvas').node();
+        var mouse = d3.mouse(container);
+
+        var tooltip = d3.select('.tooltip').style('visibility', 'visible');
+
+        tooltip.select('h2').html(d.name + "<br/>" + "desc: " + d.description + "<br/>" + "wounded: " + d.wound + "<br/>" + "year: " + d.date)
+
+        console.log(d);
+        var tooltipWidth = $('.tooltip').width();
+
+        map.setView(new L.LatLng(d.lat, d.lng), 5);
+
+
+    }
     function onMouseLeave(d) {
         d3.select('.tooltip')
             .style('visibility', 'hidden');
 
     }
+
+//-----------------------------------------------------------
+
+
 
 }).call(this);
