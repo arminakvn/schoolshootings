@@ -11,6 +11,7 @@
     var eventData;
     var circleGroup;
     var map;
+    var feature;
 
     var parseDate = d3.time.format("%m/%d/%y").parse;
 //----------------------------------------------------------------------above is the global variable so that you can use it in multiple functions
@@ -212,12 +213,15 @@ function drawPoint(eventData){
 //    var feature = d3.select(map.getPanes().overlayPane).append("svg")
 //        .attr("height", $(map.getContainer())[0].clientHeight)
 //        .attr("width", $(map.getContainer())[0].clientWidth)
-        .data(eventData)
+        .data(eventData, function(d){
+            return d.date;
+        })
         .enter().append("circle")
         .style("stroke", "black")
         .style("opacity", .6)
         .style("fill", "red")
-        .attr("r", 2);
+        .attr("r", 2.7)
+        .attr("id",function(d){ return d.id} );
 
     map.on("viewreset", update);
     update();
@@ -248,12 +252,15 @@ function drawPoint(eventData){
         var tooltipWidth = $('.tooltip').width();
 
         map.setView(new L.LatLng(d.lat, d.lng), 5);
+        d3.select($("#"+ d.id)[0]).attr("r", 16);
+
 
 
     }
     function onMouseLeave(d) {
         d3.select('.tooltip')
             .style('visibility', 'hidden');
+        d3.select($("#"+ d.id)[0]).attr("r", 2.7);
 
     }
 
