@@ -156,6 +156,9 @@
             .attr("cy", function(d){ return scales.y(d.totalVictims);})
             .attr("r", function(d){ return 5;})
             .style("opacity", 0.5)
+            .attr("id", function(d) {
+                return "ind-" + d.id
+            })
             .on('mouseover', function(d){ d3.select(this).attr('r', 8)})
             .on('mouseout', function(d){ d3.select(this).attr('r', 5)})
             .on('mouseenter', onMouseEnter)
@@ -196,13 +199,30 @@
         scales.x.domain(brush.empty() ? scales.x2.domain() : brush.extent());
         focus.select(".line").attr("d", line);
         focus.select(".x.axis").call(xAxis);
-        circleGroup.selectAll(".dot").attr("cx",function(d){ return scales.x(d.date)}).attr("cy", function(d){ return scales.y(d.totalVictims)});
-
         var s = brush.extent();
-        d3.selectAll(".circle").classed("selected", function (d){
+        selected = circleGroup.selectAll(".dot")
+        .attr("cx",function(d){ return scales.x(d.date)})
+        .attr("cy", function(d){ return scales.y(d.totalVictims)})
+        // .attr("id", function(d){
+        //     console.log("jd");
+        // })
+        .classed("selected", function (d){
+            // d3.selectAll
             return s[0] <= d.date && d.date <= s[1];
         });
-
+        console.log("s", s);
+        // console.log("selected", d)
+        d3.selectAll(document.getElementsByClassName("map-circles")).classed("selected", function (d){
+            // d3.selectAll
+            return s[0] <= d.date && d.date <= s[1];
+        }).transition().duration(700)
+        .style("opacity", 0);
+        d3.selectAll(document.getElementsByClassName("map-circles selected"))
+        .transition().duration(700)
+        .style("opacity", 0.7);
+        // .transition().duration(700)
+        // .style("opacity", 0);
+        // console.log("d3.selectAll", d3.selectAll($(".dot selected")));
     }
 
 
@@ -227,10 +247,8 @@ function drawPoint(eventData){
         .attr("id",function(d){ return d.id} ).attr("r", function(d){
             return d.kill * 1
         })
-        .attr("class",function(d){ return d.id} ).attr("r", function(d){
-            return d.kill * 1
-        })
-        .style("opacity", .6);
+        .attr("class","map-circles")
+        .style("opacity", 0);
 
     map.on("viewreset", update);
     update();
