@@ -280,12 +280,22 @@ function drawPoint(eventData){
         // map.setView(new L.LatLng(d.lat, d.lng), 4);
         d3.select($("#"+ d.id)[0])
         .transition().duration(700)
-        .style("stroke", "blue")
-        .style("stroke-width", "10")
-        .style("fill", "blue")
+        .attr("class","map-circles-hihlight")
+        .style("stroke", "none")
+        .style("stroke-width", "120")
+        .style("fill", "none")
+        .attr("r", function(d) {
+            return 0
+        } );
+        d3.selectAll(document.getElementsByClassName(d.id))
+        .transition().delay(0).duration(700)
+        .attr("class","map-circles");
+        d3.selectAll(document.getElementsByClassName("map-circles"))
+        .transition().delay(299).duration(700)
+        .style("opacity", 0.1)
 
         .attr("r", function(d) {
-            return d.kill * 2
+            return 0
         } );
 
 
@@ -299,6 +309,11 @@ function drawPoint(eventData){
         .style("stroke-width", "0")
         .style("fill", "red")
         .attr("r", function(d) {
+            return d.kill 
+        } );
+        d3.selectAll(document.getElementsByClassName("map-circles selected"))
+        .transition().delay(0).duration(700)
+        .style("opacity", 0.7).attr("r", function(d) {
             return d.kill 
         } );
 
