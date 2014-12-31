@@ -277,7 +277,9 @@ function drawPoint(eventData){
 
         console.log(d);
         var tooltipWidth = $('.tooltip').width();
-        // map.setView(new L.LatLng(d.lat, d.lng), 4);
+
+//        map.setView(new L.LatLng(d.lat, d.lng), 18);
+
         d3.select($("#"+ d.id)[0])
         .transition().duration(700)
         .attr("class","map-circles-hihlight")
