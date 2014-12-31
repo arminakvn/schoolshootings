@@ -1,11 +1,17 @@
 /*body { margin:0; padding:0; }*/
 #map {
-			width:100%;
+			width:60%;
 			height: 500px;
 		}/*p {
     font-size: 20px;
     color: black;
 }*/
+#map2 {
+    width:100px;
+    height: 200px;
+    margin-left:20px;
+}
+
 div {
       /*background: #333;*/
       /*margin-bottom: 10px;*/
@@ -31,63 +37,35 @@ div {
 body{
     font-family: 'Open Sans Condensed', sans-serif;
     font-size: 30px;
-    height: 100%;
-    width:100%;
-    position: relative;
+    z-index:-1;
+    /*height: 100%;*/
+    /*width:100%;*/
+    /*position: relative;*/
     /*background: rgb(250,250,250);*/
 }
 
-.container{
-    width:100%;
-    height:100%;
-}
+
 
 /*----------------------canvas-----------------------------------------*/
 .canvas{
-    width:80%;
-    height:90%;
+    width:800px;
+    height:300px;
     margin-left:30px;
-    top:30px;
+    margin-top:100px;
     border-radius:7px;
-    position:relative;
+    /*position:relative;*/
     background: rgb(250,250,250);
     border-style: solid;
     border-width: 1px;
-
-}
-.lineGraph {
-    width:60%;
-    height:300px;
-    margin-left:35%;
-    top:10%;
-    border-radius:7px;
-    position:relative;
-    border-style: solid;
-    border-width: 1px;
-    background:none;
-}
-.timeBar{
-    width:15%;
-    height:40px;
-    float:right;
-    margin-right:50px;
-    background: rgb(120,120,120);
-}
-.timeLegend{
-
-    font-family: Arial;
-    font-size: 12px;
-}
-.container .control{
-    width:171px;
-    height:100px;
-    left:0px;
-    margin-top:20px;
-    position:absolute;
-    float:left;
-
 }
 
+.tooltip{
+    padding: 8px;
+    background: rgb(50,50,50);
+    opacity:50;
+    position: absolute;
+    visibility:hidden;
+}
 /*----------------------font-----------------------------------------*/
 h1{
     color: #00ff00;
@@ -96,12 +74,11 @@ h1{
 }
 
 h2{
-    color: #00ff00;
-    font-size:.5em;
-    margin-left:50px; margin-right:35px; margin-top:-15px;
-    padding-top: 0px;
-    word-spacing:11px;
-    letter-spacing:1.98px;
+    color: #000;
+    margin-left:50px; margin-right:35px; margin-top:15px;
+    padding-top: 10px;
+
+    z-index:1
 
 }
 h3{
@@ -114,85 +91,33 @@ h3{
 }
 
 
-/*----------------------control-----------------------------------------*/
-.control .button{
-    color: #00ff00;
-    background-color:rgb(30,30,30);
-    font-size: .6em;
-    height:35px;
-    width:100%;
-    position:relative;
-    float:left;
-    padding-left:20px;
-    line-height:35px;
-    border-radius:7px;
-    margin-top:3px;
+
+.brush .extent {
+    stroke: #fff;
+    fill-opacity: .125;
+    shape-rendering: crispEdges;
 }
-.button:hover {
-    background: rgb(60,60,60);
-    color: rgb(141, 255, 141)
+svg {
+    font: 10px sans-serif;
 }
 
-/*------------svg-----------------*/
-.states{
-    fill:none;
-    stroke:#000;
-    stroke-width:.5px;
-}
-
-.datapoint:hover{
+.area {
     fill: steelblue;
+    clip-path: url(#clip);
 }
-/*---------------------AXES-----------------------*/
-
-.axis {shape-rendering: crispEdges;
-}
-
-.x.axis line, .x.axis path {
-    stroke: rgb(170,170,170);
-    opacity:.2;
-
-
+.line {
+    stroke: steelblue;
+    fill:none;
 }
 
-
-.y.axis line, .y.axis path {
+.axis path,
+.axis line {
     fill: none;
-    stroke: rgb(70,70,70);
-    stroke-width:1px;
-
-}
-.canvas .time-series .area{
-    fill:rgba(255,255,255,0.2);
-    /*area from plotted points*/
-}
-.canvas .time-series .line{
-    stroke-width:9px;
-    stroke:#000;
-    fill:none;
-    /*line from plotted points*/
+    stroke: #000;
+    shape-rendering: crispEdges;
 }
 
-.canvas .time-series .axis text{
-    fill:#000;
-    font-size:10px;
-    stroke:#000;
-}
-.canvas .time-series .axis path,
-.canvas .time-series .axis line{
-    stroke:#000;
-    fill:none;
-    /*axis x and y and ticks*/
-}
 
-.canvas .slider path{
-    fill:#000;
-    /*nob*/
-}
-.canvas .slider text{
-    fill:rgb(50,50,50);
-    /*nob text*/
-}
 a:link {color: rgb(90,90,90); text-decoration:none;}
 a:visited {color: rgb(90,90,90); text-decoration:none;}
 a:hover {text-decoration:none;}
