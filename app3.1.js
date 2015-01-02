@@ -87,7 +87,11 @@
 
     var bisectDate = d3.bisector(function(d) { return d.date; }).left;
 
-var hoverLineGroup = svg.append("g")
+    var div = d3.select(".tracker-chart").append("div")
+        .attr("class", "tooltip")
+        .style("opacity", 0);
+
+var hoverLineGroup = focus.append("g")
     .attr("class", "hover-line");
 
 var hoverLine = hoverLineGroup
@@ -129,13 +133,13 @@ hoverLine.style("opacity", 1e-6);
             .append("circle")
             .attr("r",3);
 
-        focus
-            .append("rect")
-            .attr("class", "overlay")
-            .attr("width", width)
-            .attr("height", height)
-            .on("mouseover", function() { circle.style("display", null); })
-            .on("mousemove", mousemove)
+//        focus
+//            .append("rect")
+//            .attr("class", "overlay")
+//            .attr("width", width)
+//            .attr("height", height)
+//            .on("mouseover", function() { circle.style("display", null); })
+////            .on("mousemove", mousemove)
 
         context.append("path") //bottom brush part
             .datum(eventData)
@@ -153,12 +157,29 @@ hoverLine.style("opacity", 1e-6);
             .selectAll("rect")
             .attr("y", -6)
             .attr("height", height2 + 7);
+
         addTooltip(div, eventData[0], "Assets");
 
         drawPoint(eventData);
 
     }
 
+    d3.select(".tracker-chart").on("mouseover", function() {
+    }).on("mousemove", function() {
+        //console.log('mousemove', d3.mouse(this));
+        var mouse_x = d3.mouse(this)[0];
+        var mouse_y = d3.mouse(this)[1];
+        var graph_y = scales.y.invert(mouse_y);
+        var graph_x = scales.x.invert(mouse_x);
+
+        hoverDate.text(function(d){return d.date}(graph_x));
+        hoverDate.attr('x', mouse_x);
+
+        hoverLine.attr("x1", mouse_x).attr("x2", mouse_x)
+        hoverLine.style("opacity", 1);
+    }).on("mouseout", function() {
+
+    });
 
     function addTooltip(div, eventData, label) {
         focus.selectAll("dot")
@@ -176,7 +197,7 @@ hoverLine.style("opacity", 1e-6);
                 div.transition()
                     .duration(50)
                     .style("opacity", .9);
-                div.html(label + "<br />" + formatTime(d.date) + "<br />" + "$" + (d.totalVictims).toFixed(3) + " Million")
+                div.html(label + "<br />" + d.date + "<br />" + "$" + (d.totalVictims).toFixed(3) + " Million")
                     .style("left", (d3.event.pageX) + "px")
                     .style("top", (d3.event.pageY - 28) + "px");
 
@@ -196,32 +217,30 @@ hoverLine.style("opacity", 1e-6);
             .attr("cy", function(d){ return scales.y(d.totalVictims)})
 
     }
-
-    function mousemove() {
-        var x0 = scales.x.invert(d3.mouse(this)[0]),
-            i = bisectDate(eventData, x0, 1),
-            d0 = eventData[i - 1],
-            d1 = eventData[i],
-            d = x0 - d0.date > d1.date - x0 ? d1 : d0;
-        circle
-            .attr("transform", "translate(" + scales.x(d.date) + "," + scales.y(d.totalVictims) + ")");
-
-
-
-
-        console.log(focus);
-
-        d3.selectAll(".map-circles")
-            .transition()
-            .delay(0)
-            .duration(40)
-            .attr("r", 2.7);
-
-        d3.select($("#"+ d.id)[0])
-            .transition()
-            .duration(40)
-            .attr("r", 16);
-    }
+//
+//    function mousemove() {
+//        var x0 = scales.x.invert(d3.mouse(this)[0]),
+//            i = bisectDate(eventData, x0, 1),
+//            d0 = eventData[i - 1],
+//            d1 = eventData[i],
+//            d = x0 - d0.date > d1.date - x0 ? d1 : d0;
+//        circle
+//            .attr("transform", "translate(" + scales.x(d.date) + "," + scales.y(d.totalVictims) + ")");
+//
+//
+//        console.log(focus);
+//
+//        d3.selectAll(".map-circles")
+//            .transition()
+//            .delay(0)
+//            .duration(40)
+//            .attr("r", 2.7);
+//
+//        d3.select($("#"+ d.id)[0])
+//            .transition()
+//            .duration(40)
+//            .attr("r", 16);
+//    }
 
     function drawPoint(eventData){
 

@@ -14,6 +14,7 @@
     var eventData;
     var circle;
     var map;
+
     var parseDate = d3.time.format("%m/%d/%y").parse;
 //----------------------------------------------------------------------above is the global variable so that you can use it in multiple functions
     var scales= {};
@@ -87,23 +88,14 @@
 
     var bisectDate = d3.bisector(function(d) { return d.date; }).left;
 
-var hoverLineGroup = svg.append("g")
-    .attr("class", "hover-line");
 
-var hoverLine = hoverLineGroup
-    .append("line")
-    .attr("x1", 10).attr("x2", 10)
-    .attr("y1", 0).attr("y2", height+10);
-
-    var hoverDate = hoverLineGroup.append('text')
-        .attr("class", "hover-text")
-        .attr('y', height - (height-10));
-
-hoverLine.style("opacity", 1e-6);
-    var div = d3.select(".tracker-chart").append("div")
-        .attr("class", "tooltip")
-        .style("opacity", 0);
-
+//    var hoverLineGroup = focus.append("g")
+//        .attr("class", "hover-line");
+//
+//    var hoverLine = hoverLineGroup
+//        .append("line")
+//        .attr("x1", 10).attr("x2", 10)
+//        .attr("y1", 0).attr("y2", height+10);
 
 
 
@@ -135,7 +127,7 @@ hoverLine.style("opacity", 1e-6);
             .attr("width", width)
             .attr("height", height)
             .on("mouseover", function() { circle.style("display", null); })
-            .on("mousemove", mousemove)
+            .on("mousemove", mousemove);
 
         context.append("path") //bottom brush part
             .datum(eventData)
@@ -160,32 +152,32 @@ hoverLine.style("opacity", 1e-6);
     }
 
 
-    function addTooltip(div, eventData, label) {
-        focus.selectAll("dot")
-            .data(eventData)
-            .enter().append("circle")
-            .attr("class", ".dot")
-            .attr("r", 5)
-            .attr("cx", function (d) {
-                return scales.x(d.date);
-            })
-            .attr("cy", function (d) {
-                return scales.y(d.totalVictims);
-            })
-            .on("mouseover", function (d) {
-                div.transition()
-                    .duration(50)
-                    .style("opacity", .9);
-                div.html(label + "<br />" + formatTime(d.date) + "<br />" + "$" + (d.totalVictims).toFixed(3) + " Million")
-                    .style("left", (d3.event.pageX) + "px")
-                    .style("top", (d3.event.pageY - 28) + "px");
-
-            }).on("mouseout", function (d) {
-                div.transition()
-                    .duration(200)
-                    .style("opacity", 0);
-            });
-    }
+//    function addTooltip(div, eventData, label) {
+//        focus.selectAll("dot")
+//            .data(eventData)
+//            .enter().append("circle")
+//            .attr("class", ".dot")
+//            .attr("r", 5)
+//            .attr("cx", function (d) {
+//                return scales.x(d.date);
+//            })
+//            .attr("cy", function (d) {
+//                return scales.y(d.totalVictims);
+//            })
+//            .on("mouseover", function (d) {
+//                div.transition()
+//                    .duration(50)
+//                    .style("opacity", .9);
+//                div.html(label + "<br />" + formatTime(d.date) + "<br />" + "$" + (d.totalVictims).toFixed(3) + " Million")
+//                    .style("left", (d3.event.pageX) + "px")
+//                    .style("top", (d3.event.pageY - 28) + "px");
+//
+//            }).on("mouseout", function (d) {
+//                div.transition()
+//                    .duration(200)
+//                    .style("opacity", 0);
+//            });
+//    }
 //-----------------------------------------------------------
     function brushed() {
         scales.x.domain(brush.empty() ? scales.x2.domain() : brush.extent());
@@ -205,9 +197,8 @@ hoverLine.style("opacity", 1e-6);
             d = x0 - d0.date > d1.date - x0 ? d1 : d0;
         circle
             .attr("transform", "translate(" + scales.x(d.date) + "," + scales.y(d.totalVictims) + ")");
-
-
-
+//        hoverLine
+//            .attr("x", scales.x(d.date));
 
         console.log(focus);
 
@@ -236,8 +227,6 @@ hoverLine.style("opacity", 1e-6);
             .attr("r", 2.7)
             .attr("class","map-circles")
             .attr("id",function(d){ return d.id} );
-
-
 
         map.on("viewreset", update);
         update();
