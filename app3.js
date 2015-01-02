@@ -12,7 +12,7 @@
         height2 = $('.canvas').height() - margin2.t - margin2.b;
 
     var eventData;
-    var circleGroup;
+    var circle;
     var map;
     var parseDate = d3.time.format("%m/%d/%y").parse;
 //----------------------------------------------------------------------above is the global variable so that you can use it in multiple functions
@@ -96,40 +96,22 @@
             .attr("class", "line")
             .attr("d", line);
 
-        circleGroup = focus.append("g");
-        circleGroup.attr("clip-path", "url(#clip)");
-        circleGroup.selectAll('.dot')
-            .data(eventData)
-            .enter().append("circle")
-            .attr('class', 'dot')
-            .attr("cx",function(d){ return scales.x(d.date);})
-            .attr("cy", function(d){ return scales.y(d.totalVictims);})
-            .attr("r", function(d){ return 3;})
-            .attr("display", "none")
-//            .on('mouseenter', onMouseEnter)
-//            .on('mouseleave', onMouseLeave);
-
+        circle = focus.append("g");
+        circle
+            .style("display", "none")
+        circle
+            .append("circle")
+            .attr("r",3)
 
         focus
             .append("rect")
             .attr("class", "overlay")
             .attr("width", width)
             .attr("height", height)
-            .on("mouseover", function() { focus.style("display", null); })
-            .on("mouseout", function() { focus.style("display", null); })
-            .on("mousemove", mousemove);
+            .on("mouseover", function() { circle.style("display", null); })
+            .on("mousemove", mousemove)
+            .on("mouseout", mouseleave);
 
-        function mousemove() {
-            var x0 = scales.x.invert(d3.mouse(this)[0]),
-                i = bisectDate(eventData, x0, 1),
-                d0 = eventData[i - 1],
-                d1 = eventData[i],
-                d = x0 - d0.date > d1.date - x0 ? d1 : d0;
-            circleGroup
-                .attr("id", function(d){console.log(d); return d.date});
-            focus.attr("transform", "translate(" + scales.x(d.date) + "," + scales.y(d.totalVictims) + ")");
-            console.log(focus);
-        }
 
         context.append("path") //bottom brush part
             .datum(eventData)
@@ -157,12 +139,41 @@
         scales.x.domain(brush.empty() ? scales.x2.domain() : brush.extent());
         focus.select(".line").attr("d", line);
         focus.select(".x.axis").call(xAxis);
-        circleGroup.selectAll(".dot")
+        circle
             .attr("cx",function(d){ return scales.x(d.date)})
             .attr("cy", function(d){ return scales.y(d.totalVictims)})
-            .on("mousemove", mousemove);
+//            .on("mousemove", mousemove);
 
     }
+    function mousemove() {
+        var x0 = scales.x.invert(d3.mouse(this)[0]),
+            i = bisectDate(eventData, x0, 1),
+            d0 = eventData[i - 1],
+            d1 = eventData[i],
+            d = x0 - d0.date > d1.date - x0 ? d1 : d0;
+        circle
+            .attr("transform", "translate(" + scales.x(d.date) + "," + scales.y(d.totalVictims) + ")");
+
+        console.log(focus);
+
+        map.setView(new L.LatLng(d.lat, d.lng), 5);
+        d3.select($("#"+ d.id)[0])
+            .transition()
+            .duration(400)
+            .attr("r", 16);
+    }
+
+    function mouseleave() {
+    console.log("something", d ,this);
+
+        d3.select($("#"+ d.id)[0])
+            .transition()
+            .duration(400)
+            .attr("r", 2.7);
+        console.log(d);
+    }
+
+
 
 
 
@@ -183,8 +194,9 @@
         update();
 
         function update() {
-            feature.attr("transform",
-             function(d) { return "translate("+ map.latLngToLayerPoint(d.LatLng).x +","+ map.latLngToLayerPoint(d.LatLng).y +")"; })}
+        feature.attr("transform",
+        function(d) { return "translate("+ map.latLngToLayerPoint(d.LatLng).x +","+ map.latLngToLayerPoint(d.LatLng).y +")"; })}
+
     }
 
     //-----------------------------------------------------------
@@ -206,15 +218,8 @@
 //            .duration(400)
 //            .attr("r", 16);
 //    }
-//
-//    function onMouseLeave(d) {
-//        d3.select('.tooltip')
-//            .style('visibility', 'hidden');
-//        d3.select($("#"+ d.id)[0])
-//            .transition()
-//            .duration(400)
-//            .attr("r", 2.7);
-//    }
+
+
 
 
 //---------------------------------------------------------------------
