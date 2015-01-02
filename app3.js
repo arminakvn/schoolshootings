@@ -26,13 +26,18 @@
 
 //----------------------------------------------------------------------
     map_el = $("body").append("<div id='map'></div>");
+
     L.mapbox.accessToken = "pk.eyJ1IjoiYXJtaW5hdm4iLCJhIjoiSTFteE9EOCJ9.iDzgmNaITa0-q-H_jw1lJw";
-    map = L.mapbox.map("map").setView([40, -74.50], 5);
+
+    map = L.mapbox.map("map", {
+        zoomControl: false
+    }).setView([40, -100.50], 5);
 
     L.control.layers({
         "Base Map": L.mapbox.tileLayer("arminavn.ib1f592g"), //satellite
-        "Open Street": L.mapbox.tileLayer("arminavn.klb2p2la").addTo(map) //street map
+        "Open Street": L.mapbox.tileLayer("arminavn.jl495p2g").addTo(map) //street map
     }).addTo(map);
+    map.scrollWheelZoom.disable();
 
 
     var xAxis = d3.svg.axis().scale(scales.x).orient('bottom').tickSize(-height, 0).tickSubdivide(true),
@@ -81,6 +86,8 @@
         .attr("transform", "translate(" + margin2.l + "," + margin2.t + ")");
 
     var bisectDate = d3.bisector(function(d) { return d.date; }).left;
+    var tTip = focus.append("g")
+
 
 //-----------------------------------------------------------
     function drawTimeLine(eventData) {
@@ -151,20 +158,26 @@
         circle
             .attr("transform", "translate(" + scales.x(d.date) + "," + scales.y(d.totalVictims) + ")");
 
-        console.log(focus);
+        tTip
+            .text(d3.event.pageX + ", " + d3.event.pageY)
+            .style("left", (d3.event.pageX - 34) + "px")
+            .style("top", (d3.event.pageY - 12) + "px")
+     
 
-        map.setView(new L.LatLng(d.lat, d.lng), 5);
+        console.log(tTip);
+
+
+        console.log(focus);
 
         d3.selectAll(".map-circles")
             .transition()
             .delay(0)
-            .duration(0)
-
+            .duration(40)
             .attr("r", 2.7);
 
         d3.select($("#"+ d.id)[0])
             .transition()
-            .duration(400)
+            .duration(40)
             .attr("r", 16);
     }
 
@@ -177,9 +190,6 @@
 //            .attr("r", 2.7);
 //        console.log(d);
 //    }
-
-
-
 
 
     function drawPoint(eventData){

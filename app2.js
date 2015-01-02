@@ -200,6 +200,7 @@
         focus.select(".line").attr("d", line);
         focus.select(".x.axis").call(xAxis);
         var s = brush.extent();
+
         selected = circleGroup.selectAll(".dot")
         .attr("cx",function(d){ return scales.x(d.date)})
         .attr("cy", function(d){ return scales.y(d.totalVictims)})
@@ -232,9 +233,6 @@ function drawPoint(eventData){
     console.log(map);
     var feature = circGroup.selectAll(".circle")
 
-//    var feature = d3.select(map.getPanes().overlayPane).append("svg")
-//        .attr("height", $(map.getContainer())[0].clientHeight)
-//        .attr("width", $(map.getContainer())[0].clientWidth)
         .data(eventData, function(d){
             return d.date;
         })
@@ -245,10 +243,10 @@ function drawPoint(eventData){
         .style("fill", "red")
         .transition().duration(20).delay(100)
         .attr("id",function(d){ return d.id} ).attr("r", function(d){
-            return d.kill * 1
+            return d.totalVictims
         })
         .attr("class","map-circles")
-        .style("opacity", 0);
+        .style("opacity", 30);
 
     map.on("viewreset", update);
     update();
