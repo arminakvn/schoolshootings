@@ -235,9 +235,7 @@
                 function(d) {
                     return "translate("+
                         map.latLngToLayerPoint(d.LatLng).x +","+
-                        map.latLngToLayerPoint(d.LatLng).y +")";
-
-                })
+                        map.latLngToLayerPoint(d.LatLng).y +")";})
         }
     }
 
@@ -259,9 +257,6 @@
             .transition()
             .duration(400)
             .attr("r", 16);
-
-
-
     }
     function onMouseLeave(d) {
         d3.select('.tooltip')

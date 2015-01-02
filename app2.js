@@ -300,8 +300,6 @@ function drawPoint(eventData){
             return 0
         } );
 
-
-
     }
     function onMouseLeave(d) {
         d3.select('.tooltip')
