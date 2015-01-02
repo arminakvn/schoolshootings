@@ -204,9 +204,9 @@ hoverLine.style("opacity", 1e-6);
             d1 = eventData[i],
             d = x0 - d0.date > d1.date - x0 ? d1 : d0;
         circle
-            .attr("transform", "translate(" + scales.x(d.date) + "," + scales.y(d.totalVictims) + ")");
+//            .attr("transform", "translate(" + scales.x(d.date) + "," + scales.y(d.totalVictims) + ")");
 
-
+            .attr("transform", "translate(" + scales.x(d.date) + "," + 0 + ")");
 
 
         console.log(focus);
