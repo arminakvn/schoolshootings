@@ -9,14 +9,11 @@
         margin2 = {t: 230, r: 10, b: 20, l: 40},
         width = $('.canvas').width() - margin.l - margin.r,
         height = $('.canvas').height() - margin.t - margin.b
-    height2 = $('.canvas').height() - margin2.t - margin2.b;
+        height2 = $('.canvas').height() - margin2.t - margin2.b;
 
     var eventData;
     var circleGroup;
     var map;
-    var feature;
-    var window;
-
     var parseDate = d3.time.format("%m/%d/%y").parse;
 //----------------------------------------------------------------------above is the global variable so that you can use it in multiple functions
     var scales= {};
@@ -29,9 +26,7 @@
 
 //----------------------------------------------------------------------
     map_el = $("body").append("<div id='map'></div>");
-
     L.mapbox.accessToken = "pk.eyJ1IjoiYXJtaW5hdm4iLCJhIjoiSTFteE9EOCJ9.iDzgmNaITa0-q-H_jw1lJw";
-
     map = L.mapbox.map("map").setView([40, -74.50], 5);
 
     L.control.layers({
@@ -77,27 +72,18 @@
     var svgMap = d3.select("#map").select("svg"),
         circGroup = svgMap.append("g");
 
-//    var svgMap = d3.select(map.getPanes().overlayPane).append("svg"),
-//        g = svgMap.append("g").attr("class", "leaflet-zoom-hide");
-
-    var focus = svg.append("g")
+    var focus = svg.append("g") //selected area
         .attr("class", "focus")
         .attr("transform", "translate(" + margin.l + "," + margin.t + ")");
 
-    var context = svg.append("g")
+    var context = svg.append("g") //entire area
         .attr("class", "context")
         .attr("transform", "translate(" + margin2.l + "," + margin2.t + ")");
 
     var bisectDate = d3.bisector(function(d) { return d.date; }).left;
 
-//----------------------------------------------------------------------
-
-
-
-
-
 //-----------------------------------------------------------
-    function drawTimeSeries(eventData) {
+    function drawTimeLine(eventData) {
 
         scales.x.domain(d3.extent(eventData.map(function(d) { return d.date; })));
         scales.y.domain([0, d3.max(eventData.map(function(d) { return d.totalVictims; }))]);
@@ -119,19 +105,10 @@
             .attr("cx",function(d){ return scales.x(d.date);})
             .attr("cy", function(d){ return scales.y(d.totalVictims);})
             .attr("r", function(d){ return 3;})
-//            .on('mouseover', function(d){ d3.select(this).attr('r', 8)})
-//            .on('mouseout', function(d){ d3.select(this).attr('r', 3)})
-            .on('mouseenter', onMouseEnter)
-            .on('mouseleave', onMouseLeave);
+            .attr("display", "none")
+//            .on('mouseenter', onMouseEnter)
+//            .on('mouseleave', onMouseLeave);
 
-//        focus.append("g") //top main graph
-//            .attr("class", "x axis")
-//            .attr("transform", "translate(0," + height + ")")
-//            .call(xAxis);
-//
-//        focus.append("g")
-//            .attr("class", "y axis")
-//            .call(yAxis);
 
         focus
             .append("rect")
@@ -141,6 +118,18 @@
             .on("mouseover", function() { focus.style("display", null); })
             .on("mouseout", function() { focus.style("display", null); })
             .on("mousemove", mousemove);
+
+        function mousemove() {
+            var x0 = scales.x.invert(d3.mouse(this)[0]),
+                i = bisectDate(eventData, x0, 1),
+                d0 = eventData[i - 1],
+                d1 = eventData[i],
+                d = x0 - d0.date > d1.date - x0 ? d1 : d0;
+            circleGroup
+                .attr("id", function(d){console.log(d); return d.date});
+            focus.attr("transform", "translate(" + scales.x(d.date) + "," + scales.y(d.totalVictims) + ")");
+            console.log(focus);
+        }
 
         context.append("path") //bottom brush part
             .datum(eventData)
@@ -168,26 +157,13 @@
         scales.x.domain(brush.empty() ? scales.x2.domain() : brush.extent());
         focus.select(".line").attr("d", line);
         focus.select(".x.axis").call(xAxis);
-        focus.on("mousemove", mousemove)
-        circleGroup.selectAll(".dot").attr("cx",function(d){ return scales.x(d.date)}).attr("cy", function(d){ return scales.y(d.totalVictims)});
-
-//        var s = brush.extent();
-//        d3.selectAll(".circle").classed("selected", function (d){
-//            return s[0] <= d.date && d.date <= s[1];
-//        });
+        circleGroup.selectAll(".dot")
+            .attr("cx",function(d){ return scales.x(d.date)})
+            .attr("cy", function(d){ return scales.y(d.totalVictims)})
+            .on("mousemove", mousemove);
 
     }
 
-    function mousemove() {
-        var x0 = scales.x.invert(d3.mouse(this)[0]),
-            i = bisectDate(eventData, x0, 1),
-            d0 = eventData[i - 1],
-            d1 = eventData[i],
-            d = x0 - d0.date > d1.date - x0 ? d1 : d0
-        focus
-            .attr("id", function(d){console.log(d); return d.date});
-        console.log(focus);
-    }
 
 
     function drawPoint(eventData){
@@ -208,38 +184,37 @@
 
         function update() {
             feature.attr("transform",
-                function(d) { return "translate("+ map.latLngToLayerPoint(d.LatLng).x +","+ map.latLngToLayerPoint(d.LatLng).y +")"; })}
+             function(d) { return "translate("+ map.latLngToLayerPoint(d.LatLng).x +","+ map.latLngToLayerPoint(d.LatLng).y +")"; })}
     }
 
     //-----------------------------------------------------------
-    function onMouseEnter(d) {
-
-        var container = d3.select('.canvas').node();
-        var mouse = d3.mouse(container);
-
-        var tooltip = d3.select('.tooltip').style('visibility', 'visible');
-
-        tooltip.select('h2').html(d.name + "<br/>" + "desc: " + d.description + "<br/>" + "wounded: " + d.wound + "<br/>" + "year: " + d.date)
-
-        console.log(d);
-        var tooltipWidth = $('.tooltip').width();
-
-        map.setView(new L.LatLng(d.lat, d.lng), 5);
-        d3.select($("#"+ d.id)[0])
-            .transition()
-            .duration(400)
-            .attr("r", 16);
-
-    }
-    function onMouseLeave(d) {
-        d3.select('.tooltip')
-            .style('visibility', 'hidden');
-        d3.select($("#"+ d.id)[0])
-            .transition()
-            .duration(400)
-            .attr("r", 2.7);
-
-    }
+//    function onMouseEnter(d) {
+//
+//        var container = d3.select('.canvas').node();
+//        var mouse = d3.mouse(container);
+//
+//        var tooltip = d3.select('.tooltip').style('visibility', 'visible');
+//
+//        tooltip.select('h2').html(d.name + "<br/>" + "desc: " + d.description + "<br/>" + "wounded: " + d.wound + "<br/>" + "year: " + d.date)
+//
+//        console.log(d);
+//        var tooltipWidth = $('.tooltip').width();
+//
+//        map.setView(new L.LatLng(d.lat, d.lng), 5);
+//        d3.select($("#"+ d.id)[0])
+//            .transition()
+//            .duration(400)
+//            .attr("r", 16);
+//    }
+//
+//    function onMouseLeave(d) {
+//        d3.select('.tooltip')
+//            .style('visibility', 'hidden');
+//        d3.select($("#"+ d.id)[0])
+//            .transition()
+//            .duration(400)
+//            .attr("r", 2.7);
+//    }
 
 
 //---------------------------------------------------------------------
@@ -251,14 +226,13 @@
         eventData.forEach(function(d) {
             var date = new Date(d.date);
             d.date = date;
-            d.LatLng = new L.LatLng(d.lat, d.lng)
-        });
+            d.LatLng = new L.LatLng(d.lat, d.lng) });
 
 
         console.log("right after event data",eventData);
         console.log(d3.time.format("%m/%d/%Y"));
 
-        drawTimeSeries(eventData);
+        drawTimeLine(eventData);
 
     }
     //-----------------------------------------------------------QUEUE
