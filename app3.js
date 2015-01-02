@@ -98,10 +98,10 @@
 
         circle = focus.append("g");
         circle
-            .style("display", "none")
+            .style("display", "none");
         circle
             .append("circle")
-            .attr("r",3)
+            .attr("r",3);
 
         focus
             .append("rect")
@@ -110,8 +110,6 @@
             .attr("height", height)
             .on("mouseover", function() { circle.style("display", null); })
             .on("mousemove", mousemove)
-            .on("mouseout", mouseleave);
-
 
         context.append("path") //bottom brush part
             .datum(eventData)
@@ -142,7 +140,6 @@
         circle
             .attr("cx",function(d){ return scales.x(d.date)})
             .attr("cy", function(d){ return scales.y(d.totalVictims)})
-//            .on("mousemove", mousemove);
 
     }
     function mousemove() {
@@ -157,21 +154,29 @@
         console.log(focus);
 
         map.setView(new L.LatLng(d.lat, d.lng), 5);
+
+        d3.selectAll(".map-circles")
+            .transition()
+            .delay(0)
+            .duration(0)
+
+            .attr("r", 2.7);
+
         d3.select($("#"+ d.id)[0])
             .transition()
             .duration(400)
             .attr("r", 16);
     }
 
-    function mouseleave() {
-    console.log("something", d ,this);
-
-        d3.select($("#"+ d.id)[0])
-            .transition()
-            .duration(400)
-            .attr("r", 2.7);
-        console.log(d);
-    }
+//    function mouseleave() {
+//
+//    svg.selectAll(".map-circles")
+//        d3.select($("#"+ d.id)[0])
+//            .transition()
+//            .duration(400)
+//            .attr("r", 2.7);
+//        console.log(d);
+//    }
 
 
 
@@ -188,7 +193,10 @@
             .style("opacity", .6)
             .style("fill", "red")
             .attr("r", 2.7)
+            .attr("class","map-circles")
             .attr("id",function(d){ return d.id} );
+
+
 
         map.on("viewreset", update);
         update();
