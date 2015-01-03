@@ -5,7 +5,7 @@
 (function() {
 
 
-    var margin = {t: 10, r: 40, b: 70, l: 40},
+    var margin = {t: 10, r: 40, b: 100, l: 40},
         margin2 = {t: 190, r: 40, b: 20, l: 40},
         width = $('.canvas').width() - margin.l - margin.r,
         height = $('.canvas').height() - margin.t - margin.b
@@ -14,6 +14,7 @@
     var eventData;
     var circle;
     var circleGroup;
+    var circleGroup2;
     var hoverLine;
     var map;
 
@@ -40,8 +41,8 @@
     }).addTo(map);
     map.scrollWheelZoom.disable();
 
-
-    var xAxis = d3.svg.axis().scale(scales.x).orient('bottom').tickSize(-height, 0).tickSubdivide(true),
+    var formatAxis = d3.format("  0");
+    var xAxis = d3.svg.axis().scale(scales.x).orient('bottom').tickSize(0).tickSubdivide(true).ticks(5).tickFormat(formatAxis),
         xAxis2 = d3.svg.axis().scale(scales.x2).orient('bottom').tickSize(-height2, 0).tickSubdivide(true),
         yAxis = d3.svg.axis().scale(scales.y).tickSize(-width, 0).orient("left");
 
@@ -70,6 +71,8 @@
         .attr("width", width)
         .attr("height", height);
 
+
+
     /* Initialize the SVG layer */
     map._initPathRoot()
 
@@ -81,8 +84,6 @@
         .attr("clip-path", "url(#clip)")
         .attr("class", "focus")
         .attr("transform", "translate(" + margin.l + "," + margin.t + ")");
-
-
 
     var context = svg.append("g") //entire area
         .attr("clip-path", "url(#clip)")
@@ -99,48 +100,10 @@
         scales.x2.domain(scales.x.domain());
         scales.y2.domain(scales.y.domain());
 
-        focus.append("path")
-            .datum(eventData)
-            .attr("class", "line")
-            .attr("d", line);
-        hoverLine = focus.append("g");
-        hoverLine
-            .style("display", "none")
-            .style("stroke-width", 2)
-            .style("stroke", "red");
-        hoverLine
-            .append("line")
-            .attr("y1", 0).attr("y2", height+10);
-        circle = focus.append("g");
-        circle
-            .style("display", "none");
-        circle
-            .append("circle")
-            .attr("r",3)
-
-        focus
-            .append("rect")
-            .attr("class", "overlay")
-            .attr("width", width)
-            .attr("height", height)
-            .on("mouseover", function() {
-                circle.style("display", null);
-                hoverLine.style("display", null); })
-            .on("mousemove", mousemove)
-
-        circleGroup = focus.append("g");
-        circleGroup.selectAll('.dot')
-            .data(eventData)
-            .enter().append("circle")
-            .attr('class', 'dot')
-            .attr("cx",function(d){ return scales.x(d.date);})
-            .attr("cy", function(d){ return scales.y(d.totalVictims);})
-            .attr("r", 1);
-
-        context.append("path") //bottom brush part
-            .datum(eventData)
-            .attr("class", "line")
-            .attr("d", line2);
+//        context.append("path") //bottom brush part
+//            .datum(eventData)
+//            .attr("class", "line")
+//            .attr("d", line2);
 
         context.append("g")
             .attr("class", "x axis")
@@ -153,6 +116,76 @@
             .selectAll("rect")
             .attr("y", -6)
             .attr("height", height2 + 7);
+
+        circleGroup2 = context.append("g");
+        circleGroup2.selectAll('.dot')
+            .data(eventData)
+            .enter().append("circle")
+            .attr('class', 'dot')
+            .attr("cx",function(d){ return scales.x2(d.date);})
+            .attr("cy", function(d){ return scales.y2(d.totalVictims);})
+            .attr("r", 1)
+            .style("fill", "yellow");
+
+        focus.append("path")
+            .datum(eventData)
+            .attr("class", "line")
+            .attr("d", line);
+
+        focus.append("text")
+            .attr("class", "x label")
+            .attr("text-anchor", "end")
+            .attr("x", width)
+            .attr("y", height + 6)
+            .text("income per capita, inflation-adjusted (dollars)");
+
+
+
+        focus.append("g") //top main graph
+            .attr("class", "x axis")
+            .attr("transform", "translate(0," + height + ")")
+            .call(xAxis)
+            .style("fill", "red");
+
+        focus.append("g")
+            .attr("class", "y axis")
+            .call(yAxis);
+        focus
+            .append("rect")
+            .attr("class", "overlay")
+            .attr("width", width)
+            .attr("height", height)
+            .on("mouseover", function() {
+                circle.style("display", null);
+                hoverLine.style("display", null); })
+            .on("mousemove", mousemove)
+
+        hoverLine = focus.append("g");
+        hoverLine
+            .style("display", "none")
+            .style("stroke-width",.3)
+            .style("stroke", "red");
+        hoverLine
+            .append("line")
+            .attr("y1", 0).attr("y2", height+10);
+        circle = focus.append("g");
+        circle
+            .style("display", "none");
+        circle
+            .append("circle")
+            .attr("r",3)
+            .style("fill", "yellow");
+        circleGroup = focus.append("g");
+        circleGroup.selectAll('.dot')
+            .data(eventData)
+            .enter().append("circle")
+            .attr('class', 'dot')
+            .attr("cx",function(d){ return scales.x(d.date);})
+            .attr("cy", function(d){ return scales.y(d.totalVictims);})
+            .attr("r", 1)
+            .style("fill", "yellow");
+
+
 
         drawPoint(eventData);
 

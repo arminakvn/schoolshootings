@@ -99,9 +99,10 @@ h3{
 
 .axis path,
 .axis line {
-    fill: #000;
+    fill: none;
     stroke: #000;
     shape-rendering: crispEdges;
+    srtoke-weight:.5px;
 }
 .overlay {
     fill: #fff;
