@@ -109,7 +109,7 @@
             .style("display", "none");
         circle
             .append("circle")
-            .attr("r",3);
+            .attr("r",3)
 
         hoverLine = focus.append("g");
         hoverLine
@@ -125,20 +125,19 @@
             .attr("class", "overlay")
             .attr("width", width)
             .attr("height", height)
-
             .on("mouseover", function() {
                 circle.style("display", null);
                 hoverLine.style("display", null); })
             .on("mousemove", mousemove)
 
-//        circleGroup = focus.append("g");
-//        circleGroup.selectAll('.dot')
-//            .data(eventData)
-//            .enter().append("circle")
-//            .attr('class', 'dot')
-//            .attr("cx",function(d){ return scales.x(d.date);})
-//            .attr("cy", function(d){ return scales.y(d.totalVictims);})
-//            .attr("r", 1);
+        circleGroup = focus.append("g");
+        circleGroup.selectAll('.dot')
+            .data(eventData)
+            .enter().append("circle")
+            .attr('class', 'dot')
+            .attr("cx",function(d){ return scales.x(d.date);})
+            .attr("cy", function(d){ return scales.y(d.totalVictims);})
+            .attr("r", 1);
 
         context.append("path") //bottom brush part
             .datum(eventData)
@@ -159,6 +158,7 @@
 
         drawPoint(eventData);
 
+
     }
 
 //-----------------------------------------------------------
@@ -166,15 +166,6 @@
         scales.x.domain(brush.empty() ? scales.x2.domain() : brush.extent());
         focus.select(".line").attr("d", line);
         focus.select(".x.axis").call(xAxis);
-        circle
-            .attr("cx",function(d){ return scales.x(d.date)})
-            .attr("cy", function(d){ return scales.y(d.totalVictims)});
-        hoverLine
-//            .attr("transform", "translate(" + scales.x(d.date) + "," + 0 + ")");
-            .attr("x1", function(d) {return scales.x(d.date)})
-            .attr("x2", function(d) {return scales.x(d.date)})
-            .attr("y1", 0).attr("y2", height);
-
         circleGroup.selectAll(".dot").attr("cx",function(d){ return scales.x(d.date)}).attr("cy", function(d){ return scales.y(d.totalVictims)});
 
 console.log(circleGroup);
