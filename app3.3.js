@@ -5,8 +5,8 @@
 (function() {
 
 
-    var margin = {t: 10, r: 10, b: 80, l: 40},
-        margin2 = {t: 230, r: 10, b: 20, l: 40},
+    var margin = {t: 10, r: 40, b: 80, l: 40},
+        margin2 = {t: 230, r: 40, b: 20, l: 40},
         width = $('.canvas').width() - margin.l - margin.r,
         height = $('.canvas').height() - margin.t - margin.b
         height2 = $('.canvas').height() - margin2.t - margin2.b;
@@ -28,16 +28,14 @@
 
 //----------------------------------------------------------------------
     map_el = $("body").append("<div id='map'></div>");
-
     L.mapbox.accessToken = "pk.eyJ1IjoiYXJtaW5hdm4iLCJhIjoiSTFteE9EOCJ9.iDzgmNaITa0-q-H_jw1lJw";
-
     map = L.mapbox.map("map", {
         zoomControl: false
     }).setView([40, -100.50], 5);
 
     L.control.layers({
         "Base Map": L.mapbox.tileLayer("arminavn.ib1f592g"), //satellite
-        "Open Street": L.mapbox.tileLayer("arminavn.jl495p2g").addTo(map) //street map
+        "Open Street": L.mapbox.tileLayer("arminavn.klb2p2la").addTo(map) //street map
     }).addTo(map);
     map.scrollWheelZoom.disable();
 
@@ -60,7 +58,6 @@
         .x(function(d) { return scales.x2(d.date); })
         .y(function(d) { return scales.y2(d.totalVictims); });
 
-
     var svg = d3.select(".canvas").append("svg")
         .attr("width", width + margin.l + margin.r)
         .attr("height", height + margin.t + margin.b);
@@ -80,16 +77,16 @@
         circGroup = svgMap.append("g");
 
     var focus = svg.append("g") //selected area
+        .attr("clip-path", "url(#clip)")
         .attr("class", "focus")
         .attr("transform", "translate(" + margin.l + "," + margin.t + ")");
 
     var context = svg.append("g") //entire area
+        .attr("clip-path", "url(#clip)")
         .attr("class", "context")
         .attr("transform", "translate(" + margin2.l + "," + margin2.t + ")");
 
     var bisectDate = d3.bisector(function(d) { return d.date; }).left;
-
-
 
 //-----------------------------------------------------------
     function drawTimeLine(eventData) {
@@ -113,8 +110,11 @@
 
         hoverLine = focus.append("g");
         hoverLine
+            .style("display", "none")
+            .style("stroke-width", 2)
+            .style("stroke", "red");
+        hoverLine
             .append("line")
-            .attr("x1", 10).attr("x2", 10)
             .attr("y1", 0).attr("y2", height+10);
 
         focus
@@ -122,7 +122,8 @@
             .attr("class", "overlay")
             .attr("width", width)
             .attr("height", height)
-            .on("mouseover", function() { circle.style("display", null); })
+            .on("mouseover", function() { circle.style("display", null);
+                                          hoverLine.style("display", null); })
             .on("mousemove", mousemove)
 
         context.append("path") //bottom brush part
@@ -154,8 +155,13 @@
         focus.select(".x.axis").call(xAxis);
         circle
             .attr("cx",function(d){ return scales.x(d.date)})
-            .attr("cy", function(d){ return scales.y(d.totalVictims)})
-
+            .attr("cy", function(d){ return scales.y(d.totalVictims)});
+        hoverLine
+//            .attr("transform", "translate(" + scales.x(d.date) + "," + 0 + ")");
+            .attr("x1", function(d) {return scales.x(d.date)})
+            .attr("x2", function(d) {return scales.x(d.date)})
+            .attr("y1", 0).attr("y2", height);
+console.log(hoverLine);
     }
 
     function mousemove() {
@@ -165,11 +171,9 @@
             d1 = eventData[i],
             d = x0 - d0.date > d1.date - x0 ? d1 : d0;
         circle
-//            .attr("transform", "translate(" + scales.x(d.date) + "," + scales.y(d.totalVictims) + ")");
-
-            .attr("transform", "translate(" + scales.x(d.date) + "," + 0 + ")");
-hoverLine
-    .attr("transform", "translate(" + scales.x(d.date) + "," + 0 + ")");
+            .attr("transform", "translate(" + scales.x(d.date) + "," + scales.y(d.totalVictims) + ")");
+        hoverLine
+              .attr("transform", "translate(" + scales.x(d.date) + "," + 0 + ")");
 
         console.log(focus);
 

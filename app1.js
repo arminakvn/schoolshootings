@@ -35,7 +35,7 @@
 
     L.control.layers({
         "Base Map": L.mapbox.tileLayer("arminavn.ib1f592g"), //satellite
-        "Open Street": L.mapbox.tileLayer("arminavn.jl495p2g").addTo(map) //street map
+        "Open Street": L.mapbox.tileLayer("arminavn.klb2p2la").addTo(map) //street
     }).addTo(map);
 
 
