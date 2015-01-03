@@ -5,8 +5,8 @@
 (function() {
 
 
-    var margin = {t: 10, r: 40, b: 70, l: 40},
-        margin2 = {t: 190, r: 40, b: 20, l: 40},
+    var margin = {t: 10, r: 40, b: 70, l: 140},
+        margin2 = {t: 190, r: 40, b: 20, l: 140},
         width = $('.canvas').width() - margin.l - margin.r,
         height = $('.canvas').height() - margin.t - margin.b
         height2 = $('.canvas').height() - margin2.t - margin2.b;
@@ -32,7 +32,7 @@
     L.mapbox.accessToken = "pk.eyJ1IjoiYXJtaW5hdm4iLCJhIjoiSTFteE9EOCJ9.iDzgmNaITa0-q-H_jw1lJw";
     map = L.mapbox.map("map", {
         zoomControl: false
-    }).setView([40, -100.50], 5);
+    }).setView([40, -100.50], 4);
 
     L.control.layers({
         "Base Map": L.mapbox.tileLayer("arminavn.ib1f592g"), //satellite
@@ -194,13 +194,15 @@ console.log(circleGroup);
             .transition()
             .duration(40)
             .attr("r", 16);
+        var tooltip = d3.select('.tooltip').style('visibility', 'visible');
+
+        tooltip.select('h2').html(d.name + "<br/>" + "desc: " + d.description + "<br/>" + "wounded: " + d.wound + "<br/>" + "year: " + d.date)
     }
 
     function drawPoint(eventData){
 
         console.log(map);
         var feature = circGroup.selectAll(".circle")
-
             .data(eventData, function(d){ return d.date; })
             .enter().append("circle")
             .style("stroke", "black")
@@ -209,8 +211,6 @@ console.log(circleGroup);
             .attr("r", 2.7)
             .attr("class","map-circles")
             .attr("id",function(d){ return d.id} );
-
-
 
         map.on("viewreset", update);
         update();
