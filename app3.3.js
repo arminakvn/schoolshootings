@@ -5,8 +5,8 @@
 (function() {
 
 
-    var margin = {t: 10, r: 40, b: 70, l: 140},
-        margin2 = {t: 190, r: 40, b: 20, l: 140},
+    var margin = {t: 10, r: 40, b: 70, l: 40},
+        margin2 = {t: 190, r: 40, b: 20, l: 40},
         width = $('.canvas').width() - margin.l - margin.r,
         height = $('.canvas').height() - margin.t - margin.b
         height2 = $('.canvas').height() - margin2.t - margin2.b;
@@ -103,14 +103,6 @@
             .datum(eventData)
             .attr("class", "line")
             .attr("d", line);
-
-        circle = focus.append("g");
-        circle
-            .style("display", "none");
-        circle
-            .append("circle")
-            .attr("r",3)
-
         hoverLine = focus.append("g");
         hoverLine
             .style("display", "none")
@@ -119,6 +111,12 @@
         hoverLine
             .append("line")
             .attr("y1", 0).attr("y2", height+10);
+        circle = focus.append("g");
+        circle
+            .style("display", "none");
+        circle
+            .append("circle")
+            .attr("r",3)
 
         focus
             .append("rect")
