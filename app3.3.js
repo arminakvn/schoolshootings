@@ -5,14 +5,15 @@
 (function() {
 
 
-    var margin = {t: 10, r: 40, b: 80, l: 40},
-        margin2 = {t: 230, r: 40, b: 20, l: 40},
+    var margin = {t: 10, r: 40, b: 70, l: 40},
+        margin2 = {t: 190, r: 40, b: 20, l: 40},
         width = $('.canvas').width() - margin.l - margin.r,
         height = $('.canvas').height() - margin.t - margin.b
         height2 = $('.canvas').height() - margin2.t - margin2.b;
 
     var eventData;
     var circle;
+    var circleGroup;
     var hoverLine;
     var map;
 
@@ -81,9 +82,11 @@
         .attr("class", "focus")
         .attr("transform", "translate(" + margin.l + "," + margin.t + ")");
 
+
+
     var context = svg.append("g") //entire area
         .attr("clip-path", "url(#clip)")
-        .attr("class", "context")
+        .attr("class", ".context")
         .attr("transform", "translate(" + margin2.l + "," + margin2.t + ")");
 
     var bisectDate = d3.bisector(function(d) { return d.date; }).left;
@@ -122,9 +125,20 @@
             .attr("class", "overlay")
             .attr("width", width)
             .attr("height", height)
-            .on("mouseover", function() { circle.style("display", null);
-                                          hoverLine.style("display", null); })
+
+            .on("mouseover", function() {
+                circle.style("display", null);
+                hoverLine.style("display", null); })
             .on("mousemove", mousemove)
+
+//        circleGroup = focus.append("g");
+//        circleGroup.selectAll('.dot')
+//            .data(eventData)
+//            .enter().append("circle")
+//            .attr('class', 'dot')
+//            .attr("cx",function(d){ return scales.x(d.date);})
+//            .attr("cy", function(d){ return scales.y(d.totalVictims);})
+//            .attr("r", 1);
 
         context.append("path") //bottom brush part
             .datum(eventData)
@@ -147,7 +161,6 @@
 
     }
 
-
 //-----------------------------------------------------------
     function brushed() {
         scales.x.domain(brush.empty() ? scales.x2.domain() : brush.extent());
@@ -161,7 +174,10 @@
             .attr("x1", function(d) {return scales.x(d.date)})
             .attr("x2", function(d) {return scales.x(d.date)})
             .attr("y1", 0).attr("y2", height);
-console.log(hoverLine);
+
+        circleGroup.selectAll(".dot").attr("cx",function(d){ return scales.x(d.date)}).attr("cy", function(d){ return scales.y(d.totalVictims)});
+
+console.log(circleGroup);
     }
 
     function mousemove() {
@@ -173,7 +189,7 @@ console.log(hoverLine);
         circle
             .attr("transform", "translate(" + scales.x(d.date) + "," + scales.y(d.totalVictims) + ")");
         hoverLine
-              .attr("transform", "translate(" + scales.x(d.date) + "," + 0 + ")");
+            .attr("transform", "translate(" + scales.x(d.date) + "," + 0 + ")");
 
         console.log(focus);
 

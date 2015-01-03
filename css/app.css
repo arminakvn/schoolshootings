@@ -1,8 +1,8 @@
 /*body { margin:0; padding:0; }*/
 #map {
-			width:100%;
-			height: 700px;
-    z-index:-1;
+	width:80%;
+	height: 700px;
+    margin-left:10px;
 		}/*p {
     font-size: 20px;
     color: black;
@@ -21,6 +21,34 @@ div {
       font-family: Arial;
       font-size: 12px;
     }
+body{
+    font-family: 'Open Sans Condensed', sans-serif;
+    font-size: 30px;
+}
+svg {
+    font: 10px sans-serif;
+
+}
+/*----------------------font-----------------------------------------*/
+h1{
+    color: #00ff00;
+    font-size: 1em;
+    margin-left:50px; margin-right:35px; margin-top:35px;
+}
+
+h2{
+    color: #000;
+    margin-left:50px; margin-right:35px; margin-top:15px;
+    padding-top: 10px;
+}
+h3{
+    color: #00ff00;
+    font-size:.5em;
+    word-spacing:11px;
+    letter-spacing:1.98px;
+    display:block;
+    width:100%;
+}
 .paratext-info {
     padding: 6px 8px;
     font: 14px/16px Arial, Helvetica, sans-serif;
@@ -34,102 +62,58 @@ div {
     color: #777;
 }
 
-body{
-    font-family: 'Open Sans Condensed', sans-serif;
-    font-size: 30px;
-    z-index:-1;
-    /*height: 100%;*/
-    /*width:100%;*/
-    /*position: relative;*/
-    /*background: rgb(250,250,250);*/
-}
-
 /*----------------------canvas-----------------------------------------*/
 .canvas{
     width:80%;
-    height:300px;
+    height:250px;
     margin-left:10px;
     margin-top:20px;
-    background: rgb(250,250,250);
-    border-style: solid;
-    border-width: 1px;
-    z-index:1;
-
-}
-
-.tooltip{
-    padding: 8px;
     background: rgb(50,50,50);
-    opacity:50;
-    position: absolute;
-    visibility:hidden;
 }
-/*----------------------font-----------------------------------------*/
-h1{
-    color: #00ff00;
-    font-size: 1em;
-    margin-left:50px; margin-right:35px; margin-top:35px;
-}
-
-h2{
-    color: #000;
-    margin-left:50px; margin-right:35px; margin-top:15px;
-    padding-top: 10px;
-
-    z-index:1
-
-}
-h3{
-    color: #00ff00;
-    font-size:.5em;
-    word-spacing:11px;
-    letter-spacing:1.98px;
-    display:block;
-    width:100%;
-}
-
-
 
 .brush .extent {
-    stroke: #fff;
+    stroke: none;
     fill-opacity: .125;
     shape-rendering: crispEdges;
 }
-svg {
-    font: 10px sans-serif;
-}
 
+/*rectangle for brush*/
 .area {
     fill: steelblue;
     clip-path: url(#clip);
+    stroke:#fff;
+
+
 }
 .line {
-    stroke: steelblue;
+    stroke: yellow;
     fill:none;
 }
 
 .axis path,
 .axis line {
-    fill: none;
+    fill: #000;
     stroke: #000;
     shape-rendering: crispEdges;
 }
 .overlay {
-    fill: none;
+    fill: #000;
+    fill-opacity: .125;
     pointer-events: all;
+
 }
-.tooltip {
-    position: absolute;
-    text-align: left;
-    width: 120px;
-    height: 48px;
-    padding: 10px;
-    font: 12px sans-serif;
-    background: steelblue;
-    border: 0px;
-    border-radius: 8px;
-    pointer-events: none;
-}
+/*.tooltip {*/
+    /*position: absolute;*/
+    /*text-align: left;*/
+    /*width: 120px;*/
+    /*height: 48px;*/
+    /*padding: 10px;*/
+    /*font: 12px sans-serif;*/
+    /*background: steelblue;*/
+    /*border: 0px;*/
+    /*border-radius: 8px;*/
+    /*pointer-events: none;*/
+/*}*/
 .hover-line {
     stroke: #000;
     fill: none;
@@ -138,12 +122,7 @@ svg {
     shape-rendering: crispEdges;
 }
 
-/*.hover-text {*/
-    /*stroke: none;*/
-    /*font-size: 12px;*/
-    /*font-weight: bold;*/
-    /*fill: #000000;*/
-/*}*/
+
 
 
 a:link {color: rgb(90,90,90); text-decoration:none;}

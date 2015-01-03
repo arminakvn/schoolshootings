@@ -165,7 +165,8 @@
         focus.append("g") //top main graph
             .attr("class", "x axis")
             .attr("transform", "translate(0," + height + ")")
-            .call(xAxis);
+            .call(xAxis)
+            .style("fill", "red");
 
         focus.append("g")
             .attr("class", "y axis")
