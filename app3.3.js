@@ -5,7 +5,7 @@
 (function() {
 
 
-    var margin = {t: 10, r: 40, b: 70, l: 40},
+    var margin = {t: 20, r: 40, b: 80, l: 40},
         margin2 = {t: 200, r: 40, b: 20, l: 40},
         width = $('.canvas').width() - margin.l - margin.r,
         height = $('.canvas').height() - margin.t - margin.b
@@ -48,8 +48,7 @@
     var svgMap = d3.select("#map").select("svg"),
         circGroup = svgMap.append("g");
 
-    var formatAxis = d3.format("  0");
-    var xAxis = d3.svg.axis().scale(scales.x).orient('bottom').tickSize(-height, margin.b).tickSubdivide(true),
+    var xAxis = d3.svg.axis().scale(scales.x).orient('bottom').tickSize(-height, 0).tickSubdivide(true),
         xAxis2 = d3.svg.axis().scale(scales.x2).orient('bottom').tickSize(-height2, 0).tickSubdivide(true),
         yAxis = d3.svg.axis().scale(scales.y).tickSize(-width, 0).orient("left");
 
@@ -106,7 +105,7 @@
 //            .attr("d", line2);
         focus.append("g") //top main graph
             .attr("class", "x axis")
-            .attr("transform", "translate(0," + (height +10) + ")")
+            .attr("transform", "translate(0," + height  + ")")
             .call(xAxis);
 
         focus.append("g")
