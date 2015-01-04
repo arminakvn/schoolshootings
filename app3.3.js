@@ -5,8 +5,8 @@
 (function() {
 
 
-    var margin = {t: 10, r: 40, b: 100, l: 40},
-        margin2 = {t: 190, r: 40, b: 20, l: 40},
+    var margin = {t: 10, r: 40, b: 70, l: 40},
+        margin2 = {t: 200, r: 40, b: 20, l: 40},
         width = $('.canvas').width() - margin.l - margin.r,
         height = $('.canvas').height() - margin.t - margin.b
         height2 = $('.canvas').height() - margin2.t - margin2.b;
@@ -42,7 +42,7 @@
     map.scrollWheelZoom.disable();
 
     var formatAxis = d3.format("  0");
-    var xAxis = d3.svg.axis().scale(scales.x).orient('bottom').tickSize(0).tickSubdivide(true).ticks(5).tickFormat(formatAxis),
+    var xAxis = d3.svg.axis().scale(scales.x).orient('bottom').tickSize(-height, margin.b).tickSubdivide(true),
         xAxis2 = d3.svg.axis().scale(scales.x2).orient('bottom').tickSize(-height2, 0).tickSubdivide(true),
         yAxis = d3.svg.axis().scale(scales.y).tickSize(-width, 0).orient("left");
 
@@ -55,10 +55,10 @@
         .x(function(d) { return scales.x(d.date); })
         .y(function(d) { return scales.y(d.totalVictims); });
 
-    var line2 = d3.svg.line()
-        .interpolate("linear")
-        .x(function(d) { return scales.x2(d.date); })
-        .y(function(d) { return scales.y2(d.totalVictims); });
+//    var line2 = d3.svg.line()
+//        .interpolate("linear")
+//        .x(function(d) { return scales.x2(d.date); })
+//        .y(function(d) { return scales.y2(d.totalVictims); });
 
     var svg = d3.select(".canvas").append("svg")
         .attr("width", width + margin.l + margin.r)
@@ -71,8 +71,6 @@
         .attr("width", width)
         .attr("height", height);
 
-
-
     /* Initialize the SVG layer */
     map._initPathRoot()
 
@@ -81,7 +79,7 @@
         circGroup = svgMap.append("g");
 
     var focus = svg.append("g") //selected area
-        .attr("clip-path", "url(#clip)")
+//        .attr("clip-path", "url(#clip)")
         .attr("class", "focus")
         .attr("transform", "translate(" + margin.l + "," + margin.t + ")");
 
@@ -104,6 +102,14 @@
 //            .datum(eventData)
 //            .attr("class", "line")
 //            .attr("d", line2);
+        focus.append("g") //top main graph
+            .attr("class", "x axis")
+            .attr("transform", "translate(0," + (height +10) + ")")
+            .call(xAxis);
+
+        focus.append("g")
+            .attr("class", "y axis")
+            .call(yAxis);
 
         context.append("g")
             .attr("class", "x axis")
@@ -115,7 +121,7 @@
             .call(brush)
             .selectAll("rect")
             .attr("y", -6)
-            .attr("height", height2 + 7);
+            .attr("height", height2 +7);
 
         circleGroup2 = context.append("g");
         circleGroup2.selectAll('.dot')
@@ -127,29 +133,28 @@
             .attr("r", 1)
             .style("fill", "yellow");
 
+
         focus.append("path")
             .datum(eventData)
             .attr("class", "line")
             .attr("d", line);
 
-        focus.append("text")
-            .attr("class", "x label")
-            .attr("text-anchor", "end")
-            .attr("x", width)
-            .attr("y", height + 6)
-            .text("income per capita, inflation-adjusted (dollars)");
+//        focus.append("text")
+//            .attr("class", "x label")
+//            .attr("text-anchor", "end")
+//            .attr("x", width)
+//            .attr("y", height + 6)
+//            .text("income per capita, inflation-adjusted (dollars)");
 
-
-
-        focus.append("g") //top main graph
-            .attr("class", "x axis")
-            .attr("transform", "translate(0," + height + ")")
-            .call(xAxis)
-            .style("fill", "red");
-
-        focus.append("g")
-            .attr("class", "y axis")
-            .call(yAxis);
+//        focus.append("g") //top main graph
+//            .attr("class", "x axis")
+//            .attr("transform", "translate(0," + height + ")")
+//            .call(xAxis)
+//            .style("fill", "red");
+//
+//        focus.append("g")
+//            .attr("class", "y axis")
+//            .call(yAxis);
         focus
             .append("rect")
             .attr("class", "overlay")
@@ -167,7 +172,9 @@
             .style("stroke", "red");
         hoverLine
             .append("line")
-            .attr("y1", 0).attr("y2", height+10);
+            .attr("y1", 0)
+            .attr("y2", height+10);
+
         circle = focus.append("g");
         circle
             .style("display", "none");
