@@ -48,7 +48,7 @@
     var svgMap = d3.select("#map").select("svg"),
         circGroup = svgMap.append("g");
 
-    var xAxis = d3.svg.axis().scale(scales.x).orient('bottom').tickSize(-height, 0).tickSubdivide(true),
+    var xAxis = d3.svg.axis().scale(scales.x).orient('bottom'),
         xAxis2 = d3.svg.axis().scale(scales.x2).orient('bottom').tickSize(-height2, 0).tickSubdivide(true),
         yAxis = d3.svg.axis().scale(scales.y).tickSize(-width, 0).orient("left");
 
@@ -106,7 +106,8 @@
         focus.append("g") //top main graph
             .attr("class", "x axis")
             .attr("transform", "translate(0," + height  + ")")
-            .call(xAxis);
+            .call(xAxis)
+
 
         focus.append("g")
             .attr("class", "y axis")
@@ -139,24 +140,9 @@
             .datum(eventData)
             .attr("class", "line")
             .attr("clip-path", "url(#clip)")
-            .attr("d", line);
+            .attr("d", line)
+            .style("opacity",.5);
 
-//        focus.append("text")
-//            .attr("class", "x label")
-//            .attr("text-anchor", "end")
-//            .attr("x", width)
-//            .attr("y", height + 6)
-//            .text("income per capita, inflation-adjusted (dollars)");
-
-//        focus.append("g") //top main graph
-//            .attr("class", "x axis")
-//            .attr("transform", "translate(0," + height + ")")
-//            .call(xAxis)
-//            .style("fill", "red");
-//
-//        focus.append("g")
-//            .attr("class", "y axis")
-//            .call(yAxis);
         focus
             .append("rect")
             .attr("class", "overlay")
@@ -194,10 +180,7 @@
             .attr("r", 1)
             .style("fill", "yellow");
 
-
-
         drawPoint(eventData);
-
 
     }
 
@@ -206,9 +189,32 @@
         scales.x.domain(brush.empty() ? scales.x2.domain() : brush.extent());
         focus.select(".line").attr("d", line);
         focus.select(".x.axis").call(xAxis);
-        circleGroup.selectAll(".dot").attr("cx",function(d){ return scales.x(d.date)}).attr("cy", function(d){ return scales.y(d.totalVictims)});
+//        circleGroup.selectAll(".dot").attr("cx",function(d){ return scales.x(d.date)}).attr("cy", function(d){ return scales.y(d.totalVictims)});
 
-console.log(circleGroup);
+        var s = brush.extent();
+
+        selected = circleGroup.selectAll(".dot")
+            .attr("cx",function(d){ return scales.x(d.date)})
+            .attr("cy", function(d){ return scales.y(d.totalVictims)})
+            .classed("selected", function (d){ return s[0] <= d.date && d.date <= s[1]; });
+
+        console.log("s", s);
+
+        d3.selectAll(document.getElementsByClassName("map-circles"))
+            .classed("selected", function (d){ return s[0] <= d.date && d.date <= s[1]; })
+            .transition().duration(40)
+            .style("opacity", 0.125)
+            .style("stroke", "none");
+
+        d3.selectAll(document.getElementsByClassName("map-circles selected"))
+            .transition().duration(40)
+            .style("opacity", 80)
+            .style("stroke", "black")
+
+
+
+
+        console.log(circleGroup);
     }
 
     function mousemove() {
