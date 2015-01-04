@@ -41,6 +41,13 @@
     }).addTo(map);
     map.scrollWheelZoom.disable();
 
+    /* Initialize the SVG layer */
+    map._initPathRoot()
+
+    /* We simply pick up the SVG from the map object */
+    var svgMap = d3.select("#map").select("svg"),
+        circGroup = svgMap.append("g");
+
     var formatAxis = d3.format("  0");
     var xAxis = d3.svg.axis().scale(scales.x).orient('bottom').tickSize(-height, margin.b).tickSubdivide(true),
         xAxis2 = d3.svg.axis().scale(scales.x2).orient('bottom').tickSize(-height2, 0).tickSubdivide(true),
@@ -71,17 +78,12 @@
         .attr("width", width)
         .attr("height", height);
 
-    /* Initialize the SVG layer */
-    map._initPathRoot()
-
-    /* We simply pick up the SVG from the map object */
-    var svgMap = d3.select("#map").select("svg"),
-        circGroup = svgMap.append("g");
 
     var focus = svg.append("g") //selected area
-//        .attr("clip-path", "url(#clip)")
         .attr("class", "focus")
         .attr("transform", "translate(" + margin.l + "," + margin.t + ")");
+
+
 
     var context = svg.append("g") //entire area
         .attr("clip-path", "url(#clip)")
@@ -137,6 +139,7 @@
         focus.append("path")
             .datum(eventData)
             .attr("class", "line")
+            .attr("clip-path", "url(#clip)")
             .attr("d", line);
 
 //        focus.append("text")
