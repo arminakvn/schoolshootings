@@ -231,9 +231,9 @@
             .transition()
             .duration(40)
             .attr("r", 16);
-        var tooltip1 = d3.select('.tooltip').style('visibility', 'visible');
+        var infobox = d3.select('.infobox').style('visibility', 'visible');
 
-        tooltip1.select('h2').html(d.name + "<br/>" + "desc: " + d.description + "<br/>" + "wounded: " + d.wound + "<br/>" + "year: " + d.date)
+        infobox.select('h2').html(d.name + "<br/>" + "desc: " + d.description + "<br/>" + "wounded: " + d.wound + "<br/>" + "year: " + d.date)
     }
 
     function drawPoint(eventData){
