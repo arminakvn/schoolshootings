@@ -180,7 +180,6 @@
         scales.x.domain(brush.empty() ? scales.x2.domain() : brush.extent());
         focus.select(".line").attr("d", line);
         focus.select(".x.axis").call(xAxis);
-//        circleGroup.selectAll(".dot").attr("cx",function(d){ return scales.x(d.date)}).attr("cy", function(d){ return scales.y(d.totalVictims)});
 
         var s = brush.extent();
 
@@ -232,8 +231,8 @@
             .duration(40)
             .attr("r", 16);
         var infobox = d3.select('.infobox').style('visibility', 'visible');
-
-        infobox.select('h2').html(d.name + "<br/>" + "desc: " + d.description + "<br/>" + "wounded: " + d.wound + "<br/>" + "year: " + d.date)
+        infobox.select('h2').html(d.title)
+        infobox.select('h3').html(d.description + "<br/>" + "wounded: " + d.wound + "<br/>" + "year: " + d.date)
     }
 
     function drawPoint(eventData){
@@ -257,28 +256,6 @@
         function(d) { return "translate("+ map.latLngToLayerPoint(d.LatLng).x +","+ map.latLngToLayerPoint(d.LatLng).y +")"; })}
 
     }
-
-    //-----------------------------------------------------------
-//    function onMouseEnter(d) {
-//
-//        var container = d3.select('.canvas').node();
-//        var mouse = d3.mouse(container);
-//
-//        var tooltip = d3.select('.tooltip').style('visibility', 'visible');
-//
-//        tooltip.select('h2').html(d.name + "<br/>" + "desc: " + d.description + "<br/>" + "wounded: " + d.wound + "<br/>" + "year: " + d.date)
-//
-//        console.log(d);
-//        var tooltipWidth = $('.tooltip').width();
-//
-//        map.setView(new L.LatLng(d.lat, d.lng), 5);
-//        d3.select($("#"+ d.id)[0])
-//            .transition()
-//            .duration(400)
-//            .attr("r", 16);
-//    }
-
-
 
 
 //---------------------------------------------------------------------
@@ -321,7 +298,8 @@
                 lat: (+d["lat"] == " " ? undefined: +d["lat"]),
                 lng: (+d["lng"] == " " ? undefined: +d["lng"]),
                 LatLng: [+d["lat"], +d["lng"]],
-                date: (d["Date"])
+                date: (d["Date"]),
+                title: (d["Title"] == " " ? undefined: d["Title"])
             }
         })
         .await(dataLoaded);
