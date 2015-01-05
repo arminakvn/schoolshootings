@@ -61,14 +61,9 @@
         .x(function(d) { return scales.x(d.date); })
         .y(function(d) { return scales.y(d.totalVictims); });
 
-//    var line2 = d3.svg.line()
-//        .interpolate("linear")
-//        .x(function(d) { return scales.x2(d.date); })
-//        .y(function(d) { return scales.y2(d.totalVictims); });
-
     var svg = d3.select(".canvas").append("svg")
-        .attr("width", width + margin.l + margin.r)
-        .attr("height", height + margin.t + margin.b);
+        .attr("width", 100% + margin.l + margin.r)
+        .attr("height", 100% + margin.t + margin.b);
 
     svg.append("defs")
         .append("clipPath")
