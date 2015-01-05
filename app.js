@@ -123,8 +123,8 @@
             .attr('class', 'dot')
             .attr("cx",function(d){ return scales.x2(d.date);})
             .attr("cy", function(d){ return scales.y2(d.totalVictims);})
-            .attr("r", 1)
-            .style("fill", "yellow");
+            .attr("r", 1.3)
+//            .style("fill", "red");
 
 
         focus.append("path")
@@ -160,7 +160,7 @@
         circle
             .append("circle")
             .attr("r",3)
-            .style("fill", "yellow");
+            .style("fill", "red");
         circleGroup = focus.append("g");
         circleGroup.selectAll('.dot')
             .data(eventData)
@@ -169,7 +169,7 @@
             .attr("cx",function(d){ return scales.x(d.date);})
             .attr("cy", function(d){ return scales.y(d.totalVictims);})
             .attr("r", 1)
-            .style("fill", "yellow");
+            .style("fill", "red");
 
         drawPoint(eventData);
 
