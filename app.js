@@ -13,8 +13,8 @@
 
     var eventData;
     var circle;
-    var circleGroup;
-    var circleGroup2;
+    var focusPoints;
+    var contextPoints;
     var hoverLine;
     var map;
 
@@ -95,15 +95,6 @@
         scales.x2.domain(scales.x.domain());
         scales.y2.domain(scales.y.domain());
 
-        focus.append("g") //top main graph
-            .attr("class", "x axis")
-            .attr("transform", "translate(0," + height  + ")")
-            .call(xAxis)
-
-        focus.append("g")
-            .attr("class", "y axis")
-            .call(yAxis);
-
         context.append("g")
             .attr("class", "x axis")
             .attr("transform", "translate(0," + height2 + ")")
@@ -116,24 +107,60 @@
             .attr("y", -6)
             .attr("height", height2 +7);
 
-        circleGroup2 = context.append("g");
-        circleGroup2.selectAll('.dot')
+        contextPoints = context.append("g");
+        contextPoints.selectAll('.dot')
             .data(eventData)
             .enter().append("circle")
             .attr('class', 'dot')
             .attr("cx",function(d){ return scales.x2(d.date);})
             .attr("cy", function(d){ return scales.y2(d.totalVictims);})
             .attr("r", 1.3)
-//            .style("fill", "red");
 
 
+
+        focus.append("g") //top main graph
+            .attr("class", "x axis")
+            .attr("transform", "translate(0," + height  + ")")
+            .call(xAxis)
+
+        focus.append("g")
+            .attr("class", "y axis")
+            .call(yAxis);
+
+        focus.append("text")
+            .attr("class", "x label")
+            .attr("text-anchor", "end")
+            .attr("transform", "translate(0," + height  + ")")
+            .text("date");
+
+        focus.append("text")
+            .attr("class", "y label")
+            .attr("text-anchor", "end")
+            .attr("x", -20)
+            .attr("y", 0)
+            .text("total victims");
         focus.append("path")
             .datum(eventData)
             .attr("class", "line")
             .attr("clip-path", "url(#clip)")
             .attr("d", line)
             .style("opacity",.5);
-
+        focusPoints = focus.append("g");
+        focusPoints.selectAll('.dot')
+            .data(eventData)
+            .enter().append("circle")
+            .attr('class', 'dot')
+            .attr("clip-path", "url(#clip)")
+            .attr("cx",function(d){ return scales.x(d.date);})
+            .attr("cy", function(d){ return scales.y(d.totalVictims);})
+            .attr("r", 1)
+            .style("fill", "red");
+//focus
+//    .append("rect")
+//    .attr("class", "overlayDates")
+//    .attr("width", width)
+//    .attr("transform", "translate(0," + height  + ")")
+//    .attr("height", "20px");
         focus
             .append("rect")
             .attr("class", "overlay")
@@ -161,15 +188,6 @@
             .append("circle")
             .attr("r",3)
             .style("fill", "red");
-        circleGroup = focus.append("g");
-        circleGroup.selectAll('.dot')
-            .data(eventData)
-            .enter().append("circle")
-            .attr('class', 'dot')
-            .attr("cx",function(d){ return scales.x(d.date);})
-            .attr("cy", function(d){ return scales.y(d.totalVictims);})
-            .attr("r", 1)
-            .style("fill", "red");
 
         drawPoint(eventData);
 
@@ -183,7 +201,7 @@
 
         var s = brush.extent();
 
-        selected = circleGroup.selectAll(".dot")
+        selected = focusPoints.selectAll(".dot")
             .attr("cx",function(d){ return scales.x(d.date)})
             .attr("cy", function(d){ return scales.y(d.totalVictims)})
             .classed("selected", function (d){ return s[0] <= d.date && d.date <= s[1]; });
@@ -193,7 +211,7 @@
         d3.selectAll(document.getElementsByClassName("map-circles"))
             .classed("selected", function (d){ return s[0] <= d.date && d.date <= s[1]; })
             .transition().duration(40)
-            .style("opacity", 0.125)
+            .style("opacity", 0)
             .style("stroke", "none");
 
         d3.selectAll(document.getElementsByClassName("map-circles selected"))
@@ -204,7 +222,7 @@
 
 
 
-        console.log(circleGroup);
+        console.log(focusPoints);
     }
 
     function mousemove() {
@@ -230,6 +248,7 @@
             .transition()
             .duration(40)
             .attr("r", 16);
+
         var infobox = d3.select('.infobox').style('visibility', 'visible');
         infobox.select('h2').html(d.title)
         infobox.select('h3').html(d.description + "<br/>" + "wounded: " + d.wound + "<br/>" + "year: " + d.date)
@@ -242,7 +261,7 @@
             .data(eventData, function(d){ return d.date; })
             .enter().append("circle")
             .style("stroke", "black")
-            .style("opacity", .6)
+            .style("opacity", 0.6)
             .style("fill", "red")
             .attr("r", 2.7)
             .attr("class","map-circles")

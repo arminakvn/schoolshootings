@@ -143,12 +143,20 @@ h3 {
     fill-opacity: .125;
     pointer-events: all;
 }
+.overlayDates {
+    fill: #000;
+    fill-opacity: .125;
+    pointer-events: all;
+    border: 5px solid red;
+}
 
 .dot{
     fill:rgb(200,0,0);
     opacity:.75;
 }
-
+.x label{
+    font-size:2em;
+}
 
 a:link {color: rgb(90,90,90); text-decoration:none;}
 a:visited {color: rgb(90,90,90); text-decoration:none;}
