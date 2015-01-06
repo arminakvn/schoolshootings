@@ -36,7 +36,7 @@
         xAxis2 = d3.svg.axis().scale(scales.x2).orient('bottom').tickSize(-height2, 0).tickSubdivide(true),
         yAxis = d3.svg.axis().scale(scales.y).tickSize(-width, 0).orient("left"),
         yAxis2 = d3.svg.axis().scale(scales.y2).orient("left").tickSize(-7, 0);
-    var brush = d3.svg.brush()
+    var brush1 = d3.svg.brush()
         .x(scales.x2)
         .on("brush", brushed);
     var line = d3.svg.line()
@@ -78,7 +78,7 @@
             .call(yAxis2);
         context.append("g")
             .attr("class", "x brush")
-            .call(brush)
+            .call(brush1)
             .selectAll("rect")
             .attr("y", -6)
             .attr("height", height2 +7);
@@ -170,10 +170,10 @@
     }
 //-----------------------------------------------------------
     function brushed() {
-        scales.x.domain(brush.empty() ? scales.x2.domain() : brush.extent());
+        scales.x.domain(brush1.empty() ? scales.x2.domain() : brush1.extent());
         focus.select(".line").attr("d", line);
         focus.select(".x.axis").call(xAxis);
-        var s = brush.extent();
+        var s = brush1.extent();
         selected = focusPoints.selectAll(".dot")
             .attr("cx",function(d){ return scales.x(d.date)})
             .attr("cy", function(d){ return scales.y(d.totalVictims)})
@@ -247,33 +247,106 @@
             var date = new Date(d.date);
             d.date = date;
             d.LatLng = new L.LatLng(d.lat, d.lng) });
-//list of dimensions extracted
-        x.domain(dimensions = d3.keys(eventData[0]).filter(function(d){
-            return d == d.shooterAge && d == d.shooterSex
-                && (y[d] = d3.scale.linear().domain(d3.extent(eventData, function(p){ return +p[d]; })).range([h, 0]));
-        }));
 
-//grey background lines
-        background = paraSvg.append("g")
-            .attr("class", "background")
-            .selectAll("path")
-            .data(eventData)
-            .enter().append("path")
-            .attr("d", path);
-        foreground = paraSvg.append("g")
-            .attr("class", "foreground")
-            .selectAll("path")
-            .data(eventData)
-            .enter().append("path")
-            .attr("d", path);
 
-        //group for each dimension
-        
 
         console.log("right after event data",eventData);
         console.log(d3.time.format("%m/%d/%Y"));
 
         drawTimeLine(eventData);
+        drawPara(eventData);
+
+    }
+function drawPara(eventData){
+
+    //list of dimensions extracted
+    x.domain(dimensions = d3.keys(eventData[0]).filter(function(d){
+        return d == d.shooterAge && d == d.shooterSex
+            && (y[d] = d3.scale.linear().domain(d3.extent(eventData, function(p){ return +p[d]; })).range([h, 0]));
+    }));
+
+//grey background lines
+    background = paraSvg.append("g")
+        .attr("class", "background")
+        .selectAll("path")
+        .data(eventData)
+        .enter().append("path")
+        .attr("d", path);
+    foreground = paraSvg.append("g")
+        .attr("class", "foreground")
+        .selectAll("path")
+        .data(eventData)
+        .enter().append("path")
+        .attr("d", path);
+
+    //group for each dimension
+    var g = paraSvg.selectAll(".dimension")
+        .data(dimensions)
+        .enter().append("g")
+        .attr("class", "dimension")
+        .attr("transform", function(d) { return "translate(" + x(d) + ")"; })
+        .call(d3.behavior.drag()
+            .origin(function(d){ return{x: x[d]}; })
+            .on("dragstart", function(d){
+                dragging[d] = x(d);
+                background.attr("visibility", "hidden");
+            })
+            .on ("drag", function(d){
+            dragging[d] = Math.min(w, Math.max(0, d3.event.x));
+            foreground.attr("d", path);
+            dimensions.sort(function(a, b){ return position(a) - position(b); });
+            x.domain(dimensions);
+            g.attr("transform", function(d) { return "translate(" + position(d) + ")"; })
+        })
+            .on("dragend", function(d){
+                delete dragging[d];
+                transition(d3.select(this)).attr("transform", "translate(" + x(d) + ")");
+                transition(foreground).attr("d", path);
+                background
+                    .attr("d", path)
+                    .transition()
+                    .delay(300)
+                    .duration(0)
+                    .attr("visibility", null);
+            }));
+    //title
+    g.append("g")
+        .attr("class", "axis")
+        .each(function(d){ d3.select(this).call(axis.scale(y[d])); })
+        .append("text")
+        .style("text-anchor", "middle")
+        .attr("y", -9)
+        .text(function(d) {return d; });
+
+    //add brush for each axis
+    g.append("g")
+        .attr("class", "brush")
+        .each(function(d){
+            d3.select(this).call(y[d].brush = d3.svg.brush().y(y[d]).on("brushstart").on("brush", brush));
+        })
+        .selectAll("rect")
+        .attr("x", -8)
+        .attr("width", 16);
+}
+    function position(d){
+        var v = dragging[d];
+        return g.transition().duration(500);
+    }
+    function path(d){
+        return paraLine(dimensions.map(function(p){ return [position(p), y[p](d[p])]; }));
+    }
+    function brushstart(){
+        d3.event.sourceEvent.stopPropagation();
+    }
+    // Handles a brush event, toggling the display of foreground lines.
+    function brush(){
+        var activities = dimensions.filter(function(p) { return !y[p].brush.empty(); }),
+            extents = activities.map(function(p) { return y[p].brush.extent(); });
+        foreground.style("display", function(d) {
+            return activities.every(function(p, i) {
+                return extents[i][0] <= d[p] && d[p] <= extents[i][1];
+            }) ? null: "none";
+        });
 
     }
     //-----------------------------------------------------------QUEUE
