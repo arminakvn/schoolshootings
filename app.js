@@ -43,18 +43,22 @@
         .interpolate("linear")
         .x(function(d) { return scales.x(d.date); })
         .y(function(d) { return scales.y(d.totalVictims); });
+
     var svg = d3.select(".canvas").append("svg")
         .attr("width", width + margin.l + margin.r)
         .attr("height", height + margin.t + margin.b);
+
     svg.append("defs")
         .append("clipPath")
         .attr("id", "clip")
         .append("rect")
         .attr("width", width)
         .attr("height", height);
+
     var focus = svg.append("g") //selected area
         .attr("class", "focus")
         .attr("transform", "translate(" + margin.l + "," + margin.t + ")");
+
     var context = svg.append("g") //entire area
         .attr("clip-path", "url(#clip)")
         .attr("class", ".context")
@@ -218,21 +222,21 @@
     //-----------------------------------------------------------Parallel
 
     var m = {t: 30, r: 10, b: 10, l: 10},
-        w = 960 - m.l - m.r,
-        h = 300 - m.t - m.b;
+        w = $('.parallel').width() - m.l - m.r,
+        h = $('.parallel').height() - m.t - m.b;
 
-    var x = d3.scale.ordinal().rangePoints([0, width], 1),
-        y = {};
+    var x = d3.scale.ordinal().rangePoints([0, w], 1),
+        y = {},
+        dragging = {};
     var paraLine = d3.svg.line(),
         paraAxis = d3.svg.axis().orient("left"),
         background,
         foreground;
-    var paraSvg = d3.select("parallel").append("svg")
+    var paraSvg = d3.select(".parallel").append("svg")
         .attr("width", w + m.l + m.r)
         .attr("height", h + m.t + m.b)
         .append("g")
         .attr("transform", "translate("+ m.l + "," + m.t + ")");
-
 //----------------------------------------------------------------Draw
 
 
@@ -248,8 +252,6 @@
             d.date = date;
             d.LatLng = new L.LatLng(d.lat, d.lng) });
 
-
-
         console.log("right after event data",eventData);
         console.log(d3.time.format("%m/%d/%Y"));
 
@@ -261,10 +263,10 @@ function drawPara(eventData){
 
     //list of dimensions extracted
     x.domain(dimensions = d3.keys(eventData[0]).filter(function(d){
-        return d == d.shooterAge && d == d.shooterSex
+        return d != d.shooterAge && d != d.shooterSex
             && (y[d] = d3.scale.linear().domain(d3.extent(eventData, function(p){ return +p[d]; })).range([h, 0]));
     }));
-
+console.log(dimensions, "dimensions");
 //grey background lines
     background = paraSvg.append("g")
         .attr("class", "background")
@@ -327,15 +329,26 @@ function drawPara(eventData){
         .selectAll("rect")
         .attr("x", -8)
         .attr("width", 16);
+
+
 }
-    function position(d){
+    //---------------------------------
+
+    function position(d) {
         var v = dragging[d];
+        return v == null ? x(d) : v;
+    }
+
+    function transition(g) {
         return g.transition().duration(500);
     }
-    function path(d){
-        return paraLine(dimensions.map(function(p){ return [position(p), y[p](d[p])]; }));
+
+// Returns the path for a given data point.
+    function path(d) {
+        return line(dimensions.map(function(p) { return [position(p), y[p](d[p])]; }));
     }
-    function brushstart(){
+
+    function brushstart() {
         d3.event.sourceEvent.stopPropagation();
     }
     // Handles a brush event, toggling the display of foreground lines.
@@ -349,6 +362,9 @@ function drawPara(eventData){
         });
 
     }
+
+    //-----------
+
     //-----------------------------------------------------------QUEUE
     queue()
 
