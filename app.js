@@ -6,7 +6,7 @@
 
 
     var margin = {t: 20, r: 40, b: 80, l: 40},
-        margin2 = {t: 200, r: 40, b: 20, l: 40},
+        margin2 = {t: 150, r: 40, b: 20, l: 40},
         width = $('.canvas').width() - margin.l - margin.r,
         height = $('.canvas').height() - margin.t - margin.b
         height2 = $('.canvas').height() - margin2.t - margin2.b;
@@ -33,7 +33,7 @@
     L.mapbox.accessToken = "pk.eyJ1IjoiYXJtaW5hdm4iLCJhIjoiSTFteE9EOCJ9.iDzgmNaITa0-q-H_jw1lJw";
     map = L.mapbox.map("map", {
         zoomControl: false
-    }).setView([40, -100.50], 4);
+    }).setView([38, -100.50], 4);
 
     L.control.layers({
         "Base Map": L.mapbox.tileLayer("arminavn.ib1f592g"), //satellite
@@ -251,7 +251,9 @@
 
         var infobox = d3.select('.infobox').style('visibility', 'visible');
         infobox.select('h2').html(d.title)
-        infobox.select('h3').html(d.description + "<br/>" + "wounded: " + d.wound + "<br/>" + "year: " + d.date)
+        infobox.select('h3').html(d.description)
+
+//        infobox.select('h3').html(d.description + "<br/>" + "wounded: " + d.wound + "<br/>" + "year: " + d.date)
     }
 
     function drawPoint(eventData){
