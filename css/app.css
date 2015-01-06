@@ -29,9 +29,7 @@ h6,
     line-height: 1.1;
     color: #fff;
 }
-h1{
-    font-size:1em;
-}
+
 h2 {
     font-size: 1.4em;
     padding:0px 15px 0px 0px;
@@ -42,9 +40,10 @@ h2 {
 }
 h3 {
     font-family: 'Open Sans Condensed', sans-serif;
-    font-size: 1.1em;
+    font-size: 1em;
     padding:0px 0px 0px 0px;
     margin-top:0px;
+    line-height: 1.2;
     /*color: rgb(149, 175, 147);*/
     /*color: rgb(176, 215, 157);*/
     /*color: rgb(0,126,187);*/
@@ -74,10 +73,18 @@ h3 {
     margin-right: -15px;
     margin-left: -15px;
 }
+h1{
+    margin: .0em 0;
+    font-size:1em;
+    line-height:1em;
+    padding-bottom:10px;
+    padding-top:10px;
+    display:block;
+}
 #header{
-    margin:0px 0px 0px;
+    margin:10px 0px 0px 0px;
     background: rgb(30,30,30);
-    border-bottom:1px;
+
 }
 .canvas{
     width:100%; height:200px;
@@ -100,7 +107,7 @@ h3 {
 
 }
 .right_bar {
-    width: 100%; height: 375px;
+    width: 100%; height: 100px;
     margin-left:0px; margin-top:0px;
     background: rgb(30,30,30);
     pointer-events: none;
@@ -153,6 +160,7 @@ h3 {
     fill: #000;
     fill-opacity: .125;
     pointer-events: all;
+    border: 1px solid #fff;
 }
 .overlayDates {
     fill: #000;

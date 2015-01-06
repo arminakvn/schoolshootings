@@ -62,8 +62,8 @@
         .y(function(d) { return scales.y(d.totalVictims); });
 
     var svg = d3.select(".canvas").append("svg")
-        .attr("width", 100% + margin.l + margin.r)
-        .attr("height", 100% + margin.t + margin.b);
+        .attr("width", width + margin.l + margin.r)
+        .attr("height", height + margin.t + margin.b);
 
     svg.append("defs")
         .append("clipPath")

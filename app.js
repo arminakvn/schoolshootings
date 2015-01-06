@@ -5,8 +5,8 @@
 (function() {
 
 
-    var margin = {t: 20, r: 40, b: 80, l: 40},
-        margin2 = {t: 150, r: 40, b: 20, l: 40},
+    var margin = {t: 20, r: 40, b: 80, l: 70},
+        margin2 = {t: 150, r: 40, b: 20, l: 70},
         width = $('.canvas').width() - margin.l - margin.r,
         height = $('.canvas').height() - margin.t - margin.b
         height2 = $('.canvas').height() - margin2.t - margin2.b;
@@ -50,7 +50,8 @@
 
     var xAxis = d3.svg.axis().scale(scales.x).orient('bottom'),
         xAxis2 = d3.svg.axis().scale(scales.x2).orient('bottom').tickSize(-height2, 0).tickSubdivide(true),
-        yAxis = d3.svg.axis().scale(scales.y).tickSize(-width, 0).orient("left");
+        yAxis = d3.svg.axis().scale(scales.y).tickSize(-width, 0).orient("left"),
+        yAxis2 = d3.svg.axis().scale(scales.y2).orient("left").tickSize(-7, 0);
 
     var brush = d3.svg.brush()
         .x(scales.x2)
@@ -79,7 +80,6 @@
         .attr("transform", "translate(" + margin.l + "," + margin.t + ")");
 
 
-
     var context = svg.append("g") //entire area
         .attr("clip-path", "url(#clip)")
         .attr("class", ".context")
@@ -99,6 +99,9 @@
             .attr("class", "x axis")
             .attr("transform", "translate(0," + height2 + ")")
             .call(xAxis2);
+        context.append("g")
+            .attr("class", "y axis")
+            .call(yAxis2);
 
         context.append("g")
             .attr("class", "x brush")
@@ -290,6 +293,9 @@
             d.date = date;
             d.LatLng = new L.LatLng(d.lat, d.lng) });
 
+        shooterSex
+        shooterAge
+        mentalIllness
 
         console.log("right after event data",eventData);
         console.log(d3.time.format("%m/%d/%Y"));
@@ -308,10 +314,12 @@
                 id: +d["CaseID"],
                 shooterAge: (+d["Average Shooter Age"] == " " ? undefined: +d["Average Shooter Age"]),
                 shooterSex: (d["Shooter Sex"] == " " ? undefined: d["Shooter Sex"]),
+                fateOfShooter: (d["Fate of Shooter"] == " " ? undefined: d["Fate of Shooter"]),
+
                 shooterRace: (d["Shooter Race"] == " " ? undefined: d["Shooter Race"]),
                 typeOfGun: (d["Type of Gun – General"] == " " ? undefined: d["Type of Gun – General"]),
                 numberOfGuns: (+d["Total Number of Guns"] == " " ? undefined: +d["Total Number of Guns"]),
-                fateOfShooter: (d["Fate of Shooter"] == " " ? undefined: d["Fate of Shooter"]),
+
                 mentalIllness: (d["History of Mental Illness - General"] == " " ? undefined: d["History of Mental Illness - General"]),
                 schoolRelated: (d["School Related"] == " " ? undefined: d["School Related"]),
                 placeType: (d["Place Type"] == " " ? undefined: d["Place Type"]),
