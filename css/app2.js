@@ -1,10 +1,13 @@
+/**
+ * Created by liapetronio on 1/6/15.
+ */
 (function() {
 
     var margin = {t: 20, r: 40, b: 80, l: 70},
         margin2 = {t: 150, r: 40, b: 20, l: 70},
         width = $('.canvas').width() - margin.l - margin.r,
         height = $('.canvas').height() - margin.t - margin.b
-        height2 = $('.canvas').height() - margin2.t - margin2.b;
+    height2 = $('.canvas').height() - margin2.t - margin2.b;
 
     var eventData, circle, focusPoints, contextPoints, hoverLine, map;
 //    var parseDate = d3.time.format("%m/%d/%y").parse;
@@ -225,7 +228,7 @@
         w = $('.parallel').width() - m.l - m.r,
         h = $('.parallel').height() - m.t - m.b;
 
-    var x = d3.scale.ordinal().rangePoints([0, w], 1),
+    var x = d3.scale.linear().rangePoints([0, w], 1),
         y = {},
         dragging = {};
     var paraLine = d3.svg.line(),
@@ -239,80 +242,79 @@
         .attr("transform", "translate("+ m.l + "," + m.t + ")");
 //----------------------------------------------------------------Draw
 
-function drawPara(eventData){
+    function drawPara(eventData){
 
-    //list of dimensions extracted
-    x.domain(dimensions = d3.keys(eventData[0]).filter(function(d){
-        console.log("ddddd", d);
-        return d != d.shooterAge
-            && (y[d] = d3.scale.linear().domain(d3.extent(eventData, function(p){ return +p[d]; })).range([h, 0]));
-    }));
-console.log(dimensions, "dimensions");
+        //list of dimensions extracted
+        x.domain(dimensions = d3.keys(eventData[0]).filter(function(d){
+            return d != d.shooterSex
+                && (y[d] = d3.scale.linear().domain(d3.extent(eventData, function(p){ return +p[d]; })).range([h, 0]));
+        }));
+        console.log(dimensions, "dimensions");
 //grey background lines
-    background = paraSvg.append("g")
-        .attr("class", "background")
-        .selectAll("path")
-        .data(eventData)
-        .enter().append("path")
-        .attr("d", path);
-    foreground = paraSvg.append("g")
-        .attr("class", "foreground")
-        .selectAll("path")
-        .data(eventData)
-        .enter().append("path")
-        .attr("d", path);
+        background = paraSvg.append("g")
+            .attr("class", "background")
+            .selectAll("path")
+            .data(eventData)
+            .enter().append("path")
+            .attr("d", path);
+        foreground = paraSvg.append("g")
+            .attr("class", "foreground")
+            .selectAll("path")
+            .data(eventData)
+            .enter().append("path")
+            .attr("d", path);
 
-    //group for each dimension
-    var g = paraSvg.selectAll(".dimension")
-        .data(dimensions)
-        .enter().append("g")
-        .attr("class", "dimension")
-        .attr("transform", function(d) { return "translate(" + x(d) + ")"; })
-        .call(d3.behavior.drag()
-            .origin(function(d){ return{x: x[d]}; })
-            .on("dragstart", function(d){
-                dragging[d] = x(d);
-                background.attr("visibility", "hidden");
+        //group for each dimension
+        var g = paraSvg.selectAll(".dimension")
+            .data(dimensions)
+            .enter().append("g")
+            .attr("class", "dimension")
+            .attr("transform", function(d) { return "translate(" + x(d) + ")"; })
+            .call(d3.behavior.drag()
+                .origin(function(d){ return{x: x[d]}; })
+                .on("dragstart", function(d){
+                    dragging[d] = x(d);
+                    background.attr("visibility", "hidden");
+                })
+                .on ("drag", function(d){
+                dragging[d] = Math.min(w, Math.max(0, d3.event.x));
+                foreground.attr("d", path);
+                dimensions.sort(function(a, b){ return position(a) - position(b); });
+                x.domain(dimensions);
+                g.attr("transform", function(d) { return "translate(" + position(d) + ")"; })
             })
-            .on("drag", function(d){
-            dragging[d] = Math.min(w, Math.max(0, d3.event.x));
-            foreground.attr("d", path);
-            dimensions.sort(function(a, b){ return position(a) - position(b); });
-            x.domain(dimensions);
-            g.attr("transform", function(d) { return "translate(" + position(d) + ")"; })
-        })
-            .on("dragend", function(d){
-                delete dragging[d];
-                transition(d3.select(this)).attr("transform", "translate(" + x(d) + ")");
-                transition(foreground).attr("d", path);
-                background
-                    .attr("d", path)
-                    .transition()
-                    .delay(300)
-                    .duration(0)
-                    .attr("visibility", null);
-            }));
-    //title
-    g.append("g")
-        .attr("class", "axis")
-        .each(function(d){ d3.select(this).call(paraAxis.scale(y[d])); })
-        .append("text")
-        .style("text-anchor", "middle")
-        .attr("y", -9)
-        .text(function(d) {return d; });
+                .on("dragend", function(d){
+                    delete dragging[d];
+                    transition(d3.select(this)).attr("transform", "translate(" + x(d) + ")");
+                    transition(foreground).attr("d", path);
+                    background
+                        .attr("d", path)
+                        .transition()
+                        .delay(300)
+                        .duration(0)
+                        .attr("visibility", null);
+                }));
+        //title
+        g.append("g")
+            .attr("class", "axis")
+            .each(function(d){ d3.select(this).call(paraAxis.scale(y[d])); })
+            .append("text")
+            .style("text-anchor", "middle")
+            .attr("y", -9)
+            .text(function(d) {return d; });
 
-    //add brush for each axis
-    g.append("g")
-        .attr("class", "brush")
-        .each(function(d){
-            d3.select(this).call(y[d].brush = d3.svg.brush().y(y[d]).on("brushstart").on("brush", brush));
-        })
-        .selectAll("rect")
-        .attr("x", -8)
-        .attr("width", 16);
+        //add brush for each axis
+        g.append("g")
+            .attr("class", "brush")
+            .each(function(d){
+                d3.select(this).call(y[d].brush = d3.svg.brush().y(y[d]).on("brushstart").on("brush", brush));
+            })
+            .selectAll("rect")
+            .attr("x", -8)
+            .attr("width", 16);
 
 
-}
+    }
     //------------------------------------------------------------
     function position(d) {
         var v = dragging[d];
@@ -370,6 +372,14 @@ console.log(dimensions, "dimensions");
             }
         })
         .await(dataLoaded);
+
+
+//    var chart = d3.parsets()
+//        .dimensions([d.shooterAge, d.shooterSex, ]);
+//
+//    var vis = d3.select("#vis").append("svg")
+//        .attr("width", chart.width())
+//        .attr("height", chart.height());
     //---------------------------------------------------------------------
     function dataLoaded(err, data) {
         if (err) console.error(err);
