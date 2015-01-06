@@ -5,16 +5,16 @@
 (function() {
 
 
-    var margin = {t: 20, r: 40, b: 80, l: 40},
-        margin2 = {t: 200, r: 40, b: 20, l: 40},
+    var margin = {t: 20, r: 40, b: 80, l: 70},
+        margin2 = {t: 150, r: 40, b: 20, l: 70},
         width = $('.canvas').width() - margin.l - margin.r,
         height = $('.canvas').height() - margin.t - margin.b
-        height2 = $('.canvas').height() - margin2.t - margin2.b;
+    height2 = $('.canvas').height() - margin2.t - margin2.b;
 
     var eventData;
     var circle;
-    var circleGroup;
-    var circleGroup2;
+    var focusPoints;
+    var contextPoints;
     var hoverLine;
     var map;
 
@@ -33,7 +33,7 @@
     L.mapbox.accessToken = "pk.eyJ1IjoiYXJtaW5hdm4iLCJhIjoiSTFteE9EOCJ9.iDzgmNaITa0-q-H_jw1lJw";
     map = L.mapbox.map("map", {
         zoomControl: false
-    }).setView([40, -100.50], 4);
+    }).setView([38, -100.50], 4);
 
     L.control.layers({
         "Base Map": L.mapbox.tileLayer("arminavn.ib1f592g"), //satellite
@@ -50,7 +50,8 @@
 
     var xAxis = d3.svg.axis().scale(scales.x).orient('bottom'),
         xAxis2 = d3.svg.axis().scale(scales.x2).orient('bottom').tickSize(-height2, 0).tickSubdivide(true),
-        yAxis = d3.svg.axis().scale(scales.y).tickSize(-width, 0).orient("left");
+        yAxis = d3.svg.axis().scale(scales.y).tickSize(-width, 0).orient("left"),
+        yAxis2 = d3.svg.axis().scale(scales.y2).orient("left").tickSize(-7, 0);
 
     var brush = d3.svg.brush()
         .x(scales.x2)
@@ -60,6 +61,7 @@
         .interpolate("linear")
         .x(function(d) { return scales.x(d.date); })
         .y(function(d) { return scales.y(d.totalVictims); });
+
 
     var svg = d3.select(".canvas").append("svg")
         .attr("width", width + margin.l + margin.r)
@@ -78,7 +80,6 @@
         .attr("transform", "translate(" + margin.l + "," + margin.t + ")");
 
 
-
     var context = svg.append("g") //entire area
         .attr("clip-path", "url(#clip)")
         .attr("class", ".context")
@@ -94,24 +95,13 @@
         scales.x2.domain(scales.x.domain());
         scales.y2.domain(scales.y.domain());
 
-//        context.append("path") //bottom brush part
-//            .datum(eventData)
-//            .attr("class", "line")
-//            .attr("d", line2);
-        focus.append("g") //top main graph
-            .attr("class", "x axis")
-            .attr("transform", "translate(0," + height  + ")")
-            .call(xAxis)
-
-
-        focus.append("g")
-            .attr("class", "y axis")
-            .call(yAxis);
-
         context.append("g")
             .attr("class", "x axis")
             .attr("transform", "translate(0," + height2 + ")")
             .call(xAxis2);
+        context.append("g")
+            .attr("class", "y axis")
+            .call(yAxis2);
 
         context.append("g")
             .attr("class", "x brush")
@@ -120,24 +110,60 @@
             .attr("y", -6)
             .attr("height", height2 +7);
 
-        circleGroup2 = context.append("g");
-        circleGroup2.selectAll('.dot')
+        contextPoints = context.append("g");
+        contextPoints.selectAll('.dot')
             .data(eventData)
             .enter().append("circle")
             .attr('class', 'dot')
             .attr("cx",function(d){ return scales.x2(d.date);})
             .attr("cy", function(d){ return scales.y2(d.totalVictims);})
-            .attr("r", 1)
-            .style("fill", "yellow");
+            .attr("r", 1.3)
 
 
+
+        focus.append("g") //top main graph
+            .attr("class", "x axis")
+            .attr("transform", "translate(0," + height  + ")")
+            .call(xAxis)
+
+        focus.append("g")
+            .attr("class", "y axis")
+            .call(yAxis);
+
+        focus.append("text")
+            .attr("class", "x label")
+            .attr("text-anchor", "end")
+            .attr("transform", "translate(0," + height  + ")")
+            .text("date");
+
+        focus.append("text")
+            .attr("class", "y label")
+            .attr("text-anchor", "end")
+            .attr("x", -20)
+            .attr("y", 0)
+            .text("total victims");
         focus.append("path")
             .datum(eventData)
             .attr("class", "line")
             .attr("clip-path", "url(#clip)")
             .attr("d", line)
             .style("opacity",.5);
-
+        focusPoints = focus.append("g");
+        focusPoints.selectAll('.dot')
+            .data(eventData)
+            .enter().append("circle")
+            .attr('class', 'dot')
+            .attr("clip-path", "url(#clip)")
+            .attr("cx",function(d){ return scales.x(d.date);})
+            .attr("cy", function(d){ return scales.y(d.totalVictims);})
+            .attr("r", 1)
+            .style("fill", "red");
+//focus
+//    .append("rect")
+//    .attr("class", "overlayDates")
+//    .attr("width", width)
+//    .attr("transform", "translate(0," + height  + ")")
+//    .attr("height", "20px");
         focus
             .append("rect")
             .attr("class", "overlay")
@@ -164,16 +190,7 @@
         circle
             .append("circle")
             .attr("r",3)
-            .style("fill", "yellow");
-        circleGroup = focus.append("g");
-        circleGroup.selectAll('.dot')
-            .data(eventData)
-            .enter().append("circle")
-            .attr('class', 'dot')
-            .attr("cx",function(d){ return scales.x(d.date);})
-            .attr("cy", function(d){ return scales.y(d.totalVictims);})
-            .attr("r", 1)
-            .style("fill", "yellow");
+            .style("fill", "red");
 
         drawPoint(eventData);
 
@@ -184,11 +201,10 @@
         scales.x.domain(brush.empty() ? scales.x2.domain() : brush.extent());
         focus.select(".line").attr("d", line);
         focus.select(".x.axis").call(xAxis);
-//        circleGroup.selectAll(".dot").attr("cx",function(d){ return scales.x(d.date)}).attr("cy", function(d){ return scales.y(d.totalVictims)});
 
         var s = brush.extent();
 
-        selected = circleGroup.selectAll(".dot")
+        selected = focusPoints.selectAll(".dot")
             .attr("cx",function(d){ return scales.x(d.date)})
             .attr("cy", function(d){ return scales.y(d.totalVictims)})
             .classed("selected", function (d){ return s[0] <= d.date && d.date <= s[1]; });
@@ -198,7 +214,7 @@
         d3.selectAll(document.getElementsByClassName("map-circles"))
             .classed("selected", function (d){ return s[0] <= d.date && d.date <= s[1]; })
             .transition().duration(40)
-            .style("opacity", 0.125)
+            .style("opacity", 0)
             .style("stroke", "none");
 
         d3.selectAll(document.getElementsByClassName("map-circles selected"))
@@ -209,10 +225,10 @@
 
 
 
-        console.log(circleGroup);
+        console.log(focusPoints);
     }
 
-    function mousemove() {
+    function mousemove(eventData) {
         var x0 = scales.x.invert(d3.mouse(this)[0]),
             i = bisectDate(eventData, x0, 1),
             d0 = eventData[i - 1],
@@ -235,9 +251,12 @@
             .transition()
             .duration(40)
             .attr("r", 16);
-        var tooltip = d3.select('.tooltip').style('visibility', 'visible');
 
-        tooltip.select('h2').html(d.name + "<br/>" + "desc: " + d.description + "<br/>" + "wounded: " + d.wound + "<br/>" + "year: " + d.date)
+        var infobox = d3.select('.infobox').style('visibility', 'visible');
+        infobox.select('h2').html(d.title)
+        infobox.select('h3').html(d.description)
+
+//        infobox.select('h3').html(d.description + "<br/>" + "wounded: " + d.wound + "<br/>" + "year: " + d.date)
     }
 
     function drawPoint(eventData){
@@ -247,7 +266,7 @@
             .data(eventData, function(d){ return d.date; })
             .enter().append("circle")
             .style("stroke", "black")
-            .style("opacity", .6)
+            .style("opacity", 0.6)
             .style("fill", "red")
             .attr("r", 2.7)
             .attr("class","map-circles")
@@ -257,32 +276,10 @@
         update();
 
         function update() {
-        feature.attr("transform",
-        function(d) { return "translate("+ map.latLngToLayerPoint(d.LatLng).x +","+ map.latLngToLayerPoint(d.LatLng).y +")"; })}
+            feature.attr("transform",
+                function(d) { return "translate("+ map.latLngToLayerPoint(d.LatLng).x +","+ map.latLngToLayerPoint(d.LatLng).y +")"; })}
 
     }
-
-    //-----------------------------------------------------------
-//    function onMouseEnter(d) {
-//
-//        var container = d3.select('.canvas').node();
-//        var mouse = d3.mouse(container);
-//
-//        var tooltip = d3.select('.tooltip').style('visibility', 'visible');
-//
-//        tooltip.select('h2').html(d.name + "<br/>" + "desc: " + d.description + "<br/>" + "wounded: " + d.wound + "<br/>" + "year: " + d.date)
-//
-//        console.log(d);
-//        var tooltipWidth = $('.tooltip').width();
-//
-//        map.setView(new L.LatLng(d.lat, d.lng), 5);
-//        d3.select($("#"+ d.id)[0])
-//            .transition()
-//            .duration(400)
-//            .attr("r", 16);
-//    }
-
-
 
 
 //---------------------------------------------------------------------
@@ -296,6 +293,10 @@
             d.date = date;
             d.LatLng = new L.LatLng(d.lat, d.lng) });
 
+        for (d.shooterSex)
+            shooterSex
+        shooterAge
+        mentalIllness
 
         console.log("right after event data",eventData);
         console.log(d3.time.format("%m/%d/%Y"));
@@ -314,10 +315,12 @@
                 id: +d["CaseID"],
                 shooterAge: (+d["Average Shooter Age"] == " " ? undefined: +d["Average Shooter Age"]),
                 shooterSex: (d["Shooter Sex"] == " " ? undefined: d["Shooter Sex"]),
+                fateOfShooter: (d["Fate of Shooter"] == " " ? undefined: d["Fate of Shooter"]),
+
                 shooterRace: (d["Shooter Race"] == " " ? undefined: d["Shooter Race"]),
                 typeOfGun: (d["Type of Gun – General"] == " " ? undefined: d["Type of Gun – General"]),
                 numberOfGuns: (+d["Total Number of Guns"] == " " ? undefined: +d["Total Number of Guns"]),
-                fateOfShooter: (d["Fate of Shooter"] == " " ? undefined: d["Fate of Shooter"]),
+
                 mentalIllness: (d["History of Mental Illness - General"] == " " ? undefined: d["History of Mental Illness - General"]),
                 schoolRelated: (d["School Related"] == " " ? undefined: d["School Related"]),
                 placeType: (d["Place Type"] == " " ? undefined: d["Place Type"]),
@@ -325,7 +328,8 @@
                 lat: (+d["lat"] == " " ? undefined: +d["lat"]),
                 lng: (+d["lng"] == " " ? undefined: +d["lng"]),
                 LatLng: [+d["lat"], +d["lng"]],
-                date: (d["Date"])
+                date: (d["Date"]),
+                title: (d["Title"] == " " ? undefined: d["Title"])
             }
         })
         .await(dataLoaded);
