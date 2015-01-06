@@ -239,26 +239,6 @@
         .attr("transform", "translate("+ m.l + "," + m.t + ")");
 //----------------------------------------------------------------Draw
 
-
-
-//---------------------------------------------------------------------
-    function dataLoaded(err, data) {
-        if (err) console.error(err);
-
-        eventData = data;
-
-        eventData.forEach(function(d) {
-            var date = new Date(d.date);
-            d.date = date;
-            d.LatLng = new L.LatLng(d.lat, d.lng) });
-
-        console.log("right after event data",eventData);
-        console.log(d3.time.format("%m/%d/%Y"));
-
-        drawTimeLine(eventData);
-        drawPara(eventData);
-
-    }
 function drawPara(eventData){
 
     //list of dimensions extracted
@@ -314,7 +294,7 @@ console.log(dimensions, "dimensions");
     //title
     g.append("g")
         .attr("class", "axis")
-        .each(function(d){ d3.select(this).call(axis.scale(y[d])); })
+        .each(function(d){ d3.select(this).call(paraAxis.scale(y[d])); })
         .append("text")
         .style("text-anchor", "middle")
         .attr("y", -9)
@@ -332,8 +312,7 @@ console.log(dimensions, "dimensions");
 
 
 }
-    //---------------------------------
-
+    //------------------------------------------------------------
     function position(d) {
         var v = dragging[d];
         return v == null ? x(d) : v;
@@ -345,7 +324,7 @@ console.log(dimensions, "dimensions");
 
 // Returns the path for a given data point.
     function path(d) {
-        return line(dimensions.map(function(p) { return [position(p), y[p](d[p])]; }));
+        return paraLine(dimensions.map(function(p) { return [position(p), y[p](d[p])]; }));
     }
 
     function brushstart() {
@@ -362,8 +341,6 @@ console.log(dimensions, "dimensions");
         });
 
     }
-
-    //-----------
 
     //-----------------------------------------------------------QUEUE
     queue()
@@ -392,6 +369,23 @@ console.log(dimensions, "dimensions");
             }
         })
         .await(dataLoaded);
-    //-----------------------------------------------------------
+    //---------------------------------------------------------------------
+    function dataLoaded(err, data) {
+        if (err) console.error(err);
+
+        eventData = data;
+
+        eventData.forEach(function(d) {
+            var date = new Date(d.date);
+            d.date = date;
+            d.LatLng = new L.LatLng(d.lat, d.lng) });
+
+        console.log("right after event data",eventData);
+        console.log(d3.time.format("%m/%d/%Y"));
+
+        drawTimeLine(eventData);
+        drawPara(eventData);
+
+    }
 
 }).call(this);

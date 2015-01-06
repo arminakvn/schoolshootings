@@ -131,7 +131,7 @@ h1{
 }
 
 /*----------------------graph-----------------------------------------*/
-.brush .extent {
+.brush1 .extent {
     stroke: none;
     fill: #000;
     fill-opacity: .125;
@@ -176,6 +176,42 @@ h1{
 .x label{
     font-size:2em;
 }
+.path{
+ fill:none;
+    stroke-weight:1px;
+    stroke:#fff;
+}
+
+.background path {
+    fill: none;
+    stroke: #ddd;
+    shape-rendering: crispEdges;
+}
+
+.foreground path {
+    fill: none;
+    stroke: steelblue;
+}
+
+.brush .extent {
+    fill-opacity: .3;
+    stroke: #fff;
+    shape-rendering: crispEdges;
+}
+
+.paraAxis line,
+.paraAxis path {
+    fill: none;
+    stroke: #000;
+    shape-rendering: crispEdges;
+}
+
+.paraAxis text {
+    text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px 0 0 #fff;
+    cursor: move;
+}
+
+
 
 a:link {color: rgb(90,90,90); text-decoration:none;}
 a:visited {color: rgb(90,90,90); text-decoration:none;}
