@@ -1,0 +1,137 @@
+/*body { margin:0; padding:0; }*/
+#map {
+	width:1100px;
+	height: 500px;
+    margin-left:40px;
+    top:10px;
+    margin-bottom:-30px;
+    z-index:-1;
+}
+#map2 {
+    width:100px;
+    height: 200px;
+    margin-left:20px;
+}
+
+div {
+      font-family: Arial;
+      font-size: 12px;
+    }
+body{
+    font-family: 'Open Sans Condensed', sans-serif;
+    font-size: 30px;
+    /*background:#11180a;*/
+    background:rgb(70,70,70);
+}
+svg {
+    font: 10px sans-serif;
+}
+/*----------------------font-----------------------------------------*/
+h1{
+    color: #00ff00;
+    font-size: 3em;
+    margin-left:50px; margin-right:35px; margin-top:1px;
+    margin-bottom: 0px;
+    z-index:5;
+}
+
+h2{
+    color: #00ff00;
+    font-size: .8em;
+    margin-left:5px; margin-right:5px; margin-top:15px;
+    padding-top: 10px;
+    line-height:1.4em;
+}
+h3{
+    color: #00ff00;
+    font-size:.8em;
+    display:block;
+    width:100%;
+}
+.paratext-info {
+    padding: 6px 8px;
+    font: 14px/16px Arial, Helvetica, sans-serif;
+    /*background: white;*/
+    /*background: rgba(255,255,255,0.8);*/
+    box-shadow: 0 0 15px rgba(0,0,0,0.2);
+    border-radius: 5px;
+}
+.paratext-info h4 {
+    margin: 0 0 5px;
+    color: #777;
+}
+
+/*----------------------canvas-----------------------------------------*/
+.canvas{
+    width:1100px;
+    height:250px;
+    left:140px;
+    margin-left:10px;
+    margin-top:20px;
+    background: rgb(30,30,30);
+    position:relative;
+    left:120px;
+
+}
+/*.canvas{*/
+    /*width:800px;*/
+    /*height:300px;*/
+    /*margin-left:30px;*/
+    /*margin-top:100px;*/
+    /*border-radius:7px;*/
+    /*position:relative;*/
+    /*background: rgb(250,250,250);*/
+    /*border-style: solid;*/
+    /*border-width: 1px;*/
+/*}*/
+.tooltip {
+    width: 120px;
+    height: 250px;
+    margin-top:20px;
+    background: rgb(30,30,30);
+    pointer-events: none;
+    z-index:1;
+    position:absolute;
+    float:left;
+    left:10px;
+
+}
+.brush .extent {
+    stroke: none;
+    fill: #fff;
+    fill-opacity: .125;
+    shape-rendering: crispEdges;
+}
+
+.area {
+    clip-path: url(#clip);
+    stroke:#fff;
+
+}
+.line {
+    stroke: yellow;
+    fill:none;
+}
+
+.axis path,
+.axis line {
+    fill: none;
+    stroke: #000;
+    shape-rendering: crispEdges;
+    srtoke-weight:.5px;
+
+}
+.overlay {
+    fill: #fff;
+    fill-opacity: .125;
+    pointer-events: all;
+
+}
+
+
+
+
+a:link {color: rgb(90,90,90); text-decoration:none;}
+a:visited {color: rgb(90,90,90); text-decoration:none;}
+a:hover {text-decoration:none;}
+a:active{color: rgb(150,150,150)text-decoration:none;}

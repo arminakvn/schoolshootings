@@ -2,33 +2,57 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
 <script src="js/jquery-1.11.1.min.js"></script>
-<!-- <script src="js/leaflet.js"></script> -->
 <script src='https://api.tiles.mapbox.com/mapbox.js/v2.1.2/mapbox.js'></script>
 <script src="js/queue.min.js"></script>
-<!--<script src="d3.slider-master/d3.slider.js"></script>-->
 <script src="js/d3.js"></script>
 <script src="js/d3.layout.cloud.js"></script>
-<script src="topojson/topojson.v1.min.js"></script>
 <link href='css/leaflet.css' rel='stylesheet' />
-<!--<link href='d3.slider-master/d3.slider.css' rel='stylesheet' />-->
+<script src="lib/bootstrap-3.3.1/dist/js/bootstrap.min.js"></script>
+<link href="lib/bootstrap-3.3.1/dist/css/bootstrap.css" rel="stylesheet"/>
+<link href="lib/bootstrap-3.3.1/dist/css/bootstrap-theme.css" rel="stylesheet"/>
 <link href='css/app.css' rel='stylesheet' />
 
 </body>
 <!-- <div id='map'></div> -->
 
 <div class="container">
-    <div class="tooltip">
-        <h2></h2>
 
-        <span></span>
+   <div class="row"><!--1-->
+        <div class="col-md-3" id="header">
+            <h1>Shootings in America</h1>
+        </div>
+
     </div>
-    <div class="canvas">
+    <div class="row"><!--2-->
 
+        <div class="col-md-12">
+            <div class="parallel"></div>
+        </div>
     </div>
-</div><!--.container-->
 
+    <div class="row"><!--3-->
+        <div class="col-md-8">
+            <div class="map" id="map"></div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="infobox"><h2></h2><h3></h3></div>
+        </div>
+    </div>
+
+    <div class="row"><!--4-->
+        <div class="col-md-10">
+            <div class="canvas"></div>
+        </div>
+    </div>
+
+</div> <!--container-->
+
+<!--<div class="col-md-4">-->
+    <!--<div class="right_bar"></div>-->
+<!--</div>-->
 
 <body>
 
-<script src="app3.js" type="text/javascript"></script>
+<script src="app.js" type="text/javascript"></script>
 
