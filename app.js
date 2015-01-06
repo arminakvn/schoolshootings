@@ -217,9 +217,9 @@
 
     //-----------------------------------------------------------Parallel
 
-    var m = {top: 30, right: 10, bottom: 10, left: 10},
-        w = 960 - margin.left - margin.right,
-        h = 500 - margin.top - margin.bottom;
+    var m = {t: 30, r: 10, b: 10, l: 10},
+        w = 960 - m.l - m.r,
+        h = 300 - m.t - m.b;
 
     var x = d3.scale.ordinal().rangePoints([0, width], 1),
         y = {};
@@ -227,6 +227,11 @@
         paraAxis = d3.svg.axis().orient("left"),
         background,
         foreground;
+    var paraSvg = d3.select("parallel").append("svg")
+        .attr("width", w + m.l + m.r)
+        .attr("height", h + m.t + m.b)
+        .append("g")
+        .attr("transform", "translate("+ m.l + "," + m.t + ")");
 
 //----------------------------------------------------------------Draw
 
@@ -242,11 +247,28 @@
             var date = new Date(d.date);
             d.date = date;
             d.LatLng = new L.LatLng(d.lat, d.lng) });
+//list of dimensions extracted
+        x.domain(dimensions = d3.keys(eventData[0]).filter(function(d){
+            return d == d.shooterAge && d == d.shooterSex
+                && (y[d] = d3.scale.linear().domain(d3.extent(eventData, function(p){ return +p[d]; })).range([h, 0]));
+        }));
 
-        x.domain(dimensions = d3.keys())
+//grey background lines
+        background = paraSvg.append("g")
+            .attr("class", "background")
+            .selectAll("path")
+            .data(eventData)
+            .enter().append("path")
+            .attr("d", path);
+        foreground = paraSvg.append("g")
+            .attr("class", "foreground")
+            .selectAll("path")
+            .data(eventData)
+            .enter().append("path")
+            .attr("d", path);
 
-
-
+        //group for each dimension
+        
 
         console.log("right after event data",eventData);
         console.log(d3.time.format("%m/%d/%Y"));
